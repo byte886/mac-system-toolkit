@@ -241,4 +241,4 @@ A：CPU 温度/负载、内存压力、硬盘空间/SMART、网络连通性（�
 - 本技能采用分层架构，新增能力时先判断属于哪一层，放入对应模块
 - 新增 App 控制方法时，优先考虑是否能用现有层覆盖，不需要为每个 App 单独建模块
 - 脚本修改后需实际运行测试
-- 敏感信息（如 power.sh 中的 token）禁止提交到公开 Git 仓库
+- 凭证类信息（如 power.sh 的 webhook token）只以 `.secrets/*.enc` 密文入库，明文绝不进 git；提交前可用 `scripts/audit-secrets.sh` 巡检

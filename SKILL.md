@@ -144,7 +144,7 @@ ncdu /path/to/dir
 ## 注意事项
 
 - **cu plane 完整规范**：见系统内置 `computer-use-automation-mac` 技能，本技能的 cu-plane-guide 是要点提炼
-- **敏感 token**：`scripts/power.sh` 含 Cloudflare webhook token，禁止提交到公开 Git 仓库
+- **webhook 凭证**：`scripts/power.sh` 不含明文，运行时从 `.secrets/power_webhook.enc` 解密；明文绝不入库，仅 `.enc` 密文可提交（本仓已公开，红线见下条与 [secret-encryption.md](references/secret-encryption.md)）
 - **权限**：axcli/cu plane 需要「辅助功能」和「屏幕录制」权限
 - **项目特定流程**：高顿课程项目的做题/下载/视频流程在项目文档中，本技能只放通用方法
 - **Git 子模块规范**：维护 `~/Doubao/skills` 技能仓库群（submodule 增删/升级、指针漂移、新机器克隆）先读 [git-submodule-workflow.md](references/git-submodule-workflow.md)；改动遵循"先子后父"两次提交
