@@ -129,6 +129,18 @@ token = subprocess.run(
 - 网盘/平台 OAuth：access_token / refresh_token / app_key / secret_key（一个 JSON 整体加密，用 `secrets json` 取字段）；
 - Playwright extension token、各类 MCP/API key、数据库连接串。
 
+### 提交前 / 定期巡检：audit-secrets.sh
+
+用本技能 `scripts/audit-secrets.sh` 递归扫描**起始目录（参数化、不写死）**下所有 git 仓库的 HEAD 快照，检查是否误把明文密码/token/私钥/`.env` 入库：
+
+```bash
+bash scripts/audit-secrets.sh ~/Doubao              # 起始目录任意
+bash scripts/audit-secrets.sh . -w                  # 额外扫工作区未提交内容
+bash scripts/audit-secrets.sh . -p '自定义可疑正则'   # 追加关心的串（真实密码不要写进脚本）
+```
+
+退出码 `0` 干净 / `1` 有待人工确认项 / `2` 高置信命中（可接 pre-commit 或 CI）。脚本自身不含任何真实密码，自定义可疑词一律运行时用 `-p` 传入。
+
 ## 9. 新机器恢复
 
 1. `secrets install` 装好全局命令（§2）；

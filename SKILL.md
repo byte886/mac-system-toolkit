@@ -54,14 +54,14 @@ compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。�
 - **ClashX 代理**：`http://127.0.0.1:7890`（HTTP），`socks5://127.0.0.1:7890`
 - **Node.js**：nvm v24.9.0 at `~/.nvm/versions/node/v24.9.0/bin/node`
 - **axcli**：`~/.cargo/bin/axcli`
-- **技能目录**：`/Users/wenjiechen/Doubao/skills/mac-system-toolkit`
+- **技能目录**：`~/Doubao/skills/mac-system-toolkit`
 
 ## 快速参考
 
 ### 常用脚本
 
 ```bash
-SKILL_DIR="/Users/wenjiechen/Doubao/skills/mac-system-toolkit"
+SKILL_DIR="$HOME/Doubao/skills/mac-system-toolkit"
 
 # 综合健康检查
 bash "$SKILL_DIR/scripts/health_check.sh"
@@ -77,6 +77,9 @@ bash "$SKILL_DIR/scripts/power.sh restart 30"
 
 # 新机器一键配置 git submodule 全局默认项（幂等，详见 git-submodule-workflow.md）
 bash "$SKILL_DIR/scripts/setup-git-submodule-global.sh"
+
+# 多仓明文密钥巡检（起始目录任意、不写死；-w 加扫工作区，-p '词' 追加可疑串，详见 secret-encryption.md）
+bash "$SKILL_DIR/scripts/audit-secrets.sh" ~/Doubao
 
 # 凭证加密/解密：全局唯一命令 secrets（新机器先执行一次 bash "$SKILL_DIR/scripts/secrets.sh" install；详见 secret-encryption.md）
 secrets get <name>              # 取全局凭证 ~/.doubao/secrets/<name>.enc

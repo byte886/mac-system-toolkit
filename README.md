@@ -148,6 +148,7 @@ mac-system-toolkit/
 └── scripts/                           # 可执行脚本
     ├── power.sh                        # 关机/重启（Cloudflare webhook，token 加密于 .secrets，默认30秒延迟可取消）
     ├── secrets.sh                      # 全局唯一凭证加解密工具（install 装为全局命令 secrets；encrypt/decrypt/json/set/get）
+    ├── audit-secrets.sh                # 多仓明文密钥巡检（起始目录参数化、不内置真实密码；扫 HEAD，-w 加扫工作区，-p 追加可疑词）
     ├── check_temp.sh                   # 温度检测（iStats 自动安装 + CPU/GPU/风扇温度）
     ├── health_check.sh                 # 综合健康检查（一键体检，支持 --full / --json）
     └── setup-git-submodule-global.sh   # 新机器一键配置 submodule 全局默认项 + gita 自动登记（幂等，可 --unset）
@@ -157,7 +158,7 @@ mac-system-toolkit/
 
 | 文件 | 用途 | 行数 | 何时读取 |
 |------|------|------|---------|
-| `README.md` | 技能说明与架构 | 238行 | 想了解技能全貌时 |
+| `README.md` | 技能说明与架构 | 244行 | 想了解技能全貌时 |
 | `SKILL.md` | 主入口，触发后首先加载 | 149行 | 每次触发技能时 |
 | `references/cu-plane-guide.md` | 统一桌面控制规范 | 222行 | 操作原生 App GUI 时 |
 | `references/chrome-app-control.md` | Chrome 内核应用控制（含 Gemini 按钮飞书指针） | 324行 | 操作 Chrome/VSCode/Electron 内部内容时 |
@@ -167,9 +168,10 @@ mac-system-toolkit/
 | `references/vpn-control.md` | VPN/代理控制 | 355行 | 开关 VPN/设置代理/查网络时 |
 | `references/file-search.md` | 文件搜索 | 183行 | 找文件/搜索内容/磁盘空间分析时 |
 | `references/git-submodule-workflow.md` | Git submodule 多仓库规范（含 gita） | 335行 | 维护技能仓库群/子模块/多仓总览/新机器配置时 |
-| `references/secret-encryption.md` | 凭证/密码统一加密约定（全局唯一工具） | 153行 | 任何密码/token/密钥需要落盘或取用時 |
+| `references/secret-encryption.md` | 凭证/密码统一加密约定（全局唯一工具） | 165行 | 任何密码/token/密钥需要落盘或取用時 |
 | `scripts/power.sh` | 关机重启脚本（token 运行时解密） | 29行 | 执行关机/重启时 |
 | `scripts/secrets.sh` | 全局唯一凭证加解密工具（`install` 装为全局命令 secrets） | 111行 | 加密/解密/存取密码 token 时 |
+| `scripts/audit-secrets.sh` | 多仓明文密钥巡检（目录参数化、不内置真实密码；退出码 0干净/1待确认/2高置信） | 102行 | 提交前/换机/定期自检是否有明文凭证时 |
 | `scripts/check_temp.sh` | 温度检测脚本 | 83行 | 检测温度时 |
 | `scripts/health_check.sh` | 综合体检脚本 | 276行 | 一键健康检查时 |
 | `scripts/setup-git-submodule-global.sh` | 新机器 submodule 全局配置 + gita 登记 + secrets 全局命令（幂等） | 84行 | 在新机器配置 git 全局默认项时 |
@@ -181,7 +183,7 @@ mac-system-toolkit/
 ### 常用场景
 
 ```bash
-SKILL_DIR="/Users/wenjiechen/Doubao/skills/mac-system-toolkit"
+SKILL_DIR="$HOME/Doubao/skills/mac-system-toolkit"
 
 # 1. 综合健康检查（温度+CPU+内存+硬盘+网络+风扇）
 bash "$SKILL_DIR/scripts/health_check.sh"
@@ -194,6 +196,9 @@ bash "$SKILL_DIR/scripts/power.sh shutdown 30"
 
 # 4. 重启（30秒延迟，可取消）
 bash "$SKILL_DIR/scripts/power.sh restart 30"
+
+# 5. 多仓明文密钥巡检（起始目录任意，不写死；-w 加扫工作区，-p '词' 追加可疑串）
+bash "$SKILL_DIR/scripts/audit-secrets.sh" ~/Doubao
 ```
 
 ### 触发词
@@ -208,6 +213,7 @@ bash "$SKILL_DIR/scripts/power.sh restart 30"
 - Git submodule、子模块、技能仓库拆分、指针漂移、批量管理多个 git 仓库、新机器克隆技能仓库
 - gita、一屏看所有仓库状态、多仓库总览/批量拉取
 - 凭证/token/密码/API key 加密存储、密钥解密、sudo 密码保存、明文不入 git
+- 明文密钥巡检、凭证泄露扫描、提交前检查有没有写死密码/token、多仓库密钥自检
 
 ---
 
