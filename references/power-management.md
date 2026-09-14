@@ -58,7 +58,7 @@
 1. 先执行豆包忙碌检测（见上），告知用户当前是否有活跃任务。
 2. 如用户确认关机，运行：
    ```bash
-   bash /Users/wenjiechen/Doubao/skills/mac-system-toolkit/scripts/power.sh shutdown 30
+   bash ~/Doubao/skills/mac-system-toolkit/scripts/power.sh shutdown 30
    ```
 3. 脚本输出 `PID=<数字>`，记录该 PID。
 4. 告知用户："30秒后执行关机，说'取消'可停止。"
@@ -74,7 +74,7 @@
 与关机流程相同，将 `shutdown` 改为 `restart`：
 
 ```bash
-bash /Users/wenjiechen/Doubao/skills/mac-system-toolkit/scripts/power.sh restart 30
+bash ~/Doubao/skills/mac-system-toolkit/scripts/power.sh restart 30
 ```
 
 ---
@@ -90,7 +90,7 @@ bash /Users/wenjiechen/Doubao/skills/mac-system-toolkit/scripts/power.sh restart
 ## 五、脚本用法
 
 ```bash
-POWER_SCRIPT="/Users/wenjiechen/Doubao/skills/mac-system-toolkit/scripts/power.sh"
+POWER_SCRIPT="$HOME/Doubao/skills/mac-system-toolkit/scripts/power.sh"
 
 # 关机（默认30秒延迟）
 bash "$POWER_SCRIPT" shutdown

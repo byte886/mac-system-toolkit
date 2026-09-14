@@ -6,7 +6,7 @@
 
 **一键检查**：
 ```bash
-bash /Users/wenjiechen/Doubao/skills/mac-system-toolkit/scripts/health_check.sh
+bash ~/Doubao/skills/mac-system-toolkit/scripts/health_check.sh
 ```
 
 ## 检查项详解

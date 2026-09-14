@@ -36,7 +36,7 @@ mdfind -onlyin "$HOME" -name "contract" | grep -v '/$'
 mdfind -name ".mov" | grep -iE '\.mov$' | head -20
 
 # 在指定位置搜索
-mdfind -onlyin "/Users/wenjiechen/Documents" -name "report"
+mdfind -onlyin "$HOME/Documents" -name "report"
 ```
 
 **注意**：`mdfind -name` 是子串匹配。如果 Spotlight 索引过期，`mdutil -E /` 重建索引（需要几分钟，仅在结果明显错误时执行）。
@@ -53,7 +53,7 @@ fd "report"
 fd -H "report" /path/to/dir
 
 # 按扩展名
-fd -e pdf /Users/wenjiechen/Documents
+fd -e pdf ~/Documents
 
 # 文件名正则匹配
 fd -H "\.(mov|mp4)$" /Users/Shared/Aerial
@@ -101,15 +101,15 @@ rg -c "error" /var/log
 
 ```bash
 # 交互式分析目录（方向键导航，d 删除，q 退出）
-ncdu /Users/wenjiechen
+ncdu ~
 
 # 非交互式：只显示最大的目录
-ncdu -o - /Users/wenjiechen | head -30
+ncdu -o - ~ | head -30
 # 或用 du 快速取 Top N
-du -sh /Users/wenjiechen/* 2>/dev/null | sort -rh | head -20
+du -sh ~/* 2>/dev/null | sort -rh | head -20
 
 # 带深度限制分析（大目录更快）
-ncdu -d 2 /Users/wenjiechen
+ncdu -d 2 ~
 ```
 
 ---
