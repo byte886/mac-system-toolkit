@@ -77,4 +77,8 @@ if [ -n "$GITA" ] && [ -d "$DOUBAO_ROOT" ]; then
     && echo "已用 gita 递归登记 $DOUBAO_ROOT 下仓库（运行 'gita ll' 总览）"
 fi
 
+# 安装全局凭证命令 secrets（软链到 ~/.local/bin/secrets，幂等）
+SECRETS_SH="$DOUBAO_ROOT/skills/mac-system-toolkit/scripts/secrets.sh"
+[ -f "$SECRETS_SH" ] && bash "$SECRETS_SH" install
+
 echo "完成。注意：这些是全局默认；全新克隆仍要记得 git clone --recurse-submodules。"

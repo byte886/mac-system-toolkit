@@ -78,9 +78,9 @@ bash "$SKILL_DIR/scripts/power.sh restart 30"
 # 新机器一键配置 git submodule 全局默认项（幂等，详见 git-submodule-workflow.md）
 bash "$SKILL_DIR/scripts/setup-git-submodule-global.sh"
 
-# 凭证加密/解密（统一约定，详见 secret-encryption.md；主密码取 ENC_PASS 或交互输入）
-bash "$SKILL_DIR/scripts/secrets.sh" get <name>              # 取全局凭证 ~/.doubao/secrets/<name>.enc
-bash "$SKILL_DIR/scripts/secrets.sh" decrypt .secrets/x.enc  # 解项目内密文
+# 凭证加密/解密：全局唯一命令 secrets（新机器先执行一次 bash "$SKILL_DIR/scripts/secrets.sh" install；详见 secret-encryption.md）
+secrets get <name>              # 取全局凭证 ~/.doubao/secrets/<name>.enc
+secrets decrypt .secrets/x.enc  # 解项目内密文；secrets json x.enc <字段> 解 JSON 密文取字段
 ```
 
 ### 常用命令
