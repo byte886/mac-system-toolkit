@@ -38,6 +38,16 @@ which secrets        # -> ~/.local/bin/secrets（该目录已在 PATH）
 - AI 只在会话记忆中临时持有，用户未提供时**直接问，不猜测、不写死**；
 - `.enc` 即使进公开仓库，没有主密码也解不开；能不入库仍优先不入库（§4）。
 
+### 自动化非交互场景：本机主密码文件
+
+流水线要无人值守、无法交互输密码时，主密码放**本机、600 权限、仓库外**的文件，由一段极薄的项目片段读取（主密码仍不进 git）：
+
+- 固定路径：`$DOUBAO_MASTER_PASS_FILE`，默认 `~/.doubao/secrets/master.pass`（一行明文，`chmod 600`，在所有仓库之外、永不入库）；
+- 项目脚本统一**三级回退**：已 export 的密码变量（如 `BAIDU_ENC_PASS`）> `master.pass` > 交互输入，全缺则报错退出。参考实现：高顿 `scripts/lib/load_enc_pass.sh`；
+- 建立：`umask 077; printf '%s' '主密码' > ~/.doubao/secrets/master.pass && chmod 600 ~/.doubao/secrets/master.pass`；新机器需线下重建一次。
+
+> 这是“自动化可用”与“不在仓库写死密码”之间的标准折中：靠 600 文件权限 + 不入库保护（主密码无法再用自身加密，故此处为明文文件，仅限本机当前用户可读）。
+
 ## 4. 两级存放位置
 
 | 级别 | 路径 | 装什么 | 是否进 git |

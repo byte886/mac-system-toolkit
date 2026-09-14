@@ -167,7 +167,7 @@ mac-system-toolkit/
 | `references/vpn-control.md` | VPN/代理控制 | 355行 | 开关 VPN/设置代理/查网络时 |
 | `references/file-search.md` | 文件搜索 | 183行 | 找文件/搜索内容/磁盘空间分析时 |
 | `references/git-submodule-workflow.md` | Git submodule 多仓库规范（含 gita） | 335行 | 维护技能仓库群/子模块/多仓总览/新机器配置时 |
-| `references/secret-encryption.md` | 凭证/密码统一加密约定（全局唯一工具） | 143行 | 任何密码/token/密钥需要落盘或取用時 |
+| `references/secret-encryption.md` | 凭证/密码统一加密约定（全局唯一工具） | 153行 | 任何密码/token/密钥需要落盘或取用時 |
 | `scripts/power.sh` | 关机重启脚本（token 运行时解密） | 29行 | 执行关机/重启时 |
 | `scripts/secrets.sh` | 全局唯一凭证加解密工具（`install` 装为全局命令 secrets） | 111行 | 加密/解密/存取密码 token 时 |
 | `scripts/check_temp.sh` | 温度检测脚本 | 83行 | 检测温度时 |
