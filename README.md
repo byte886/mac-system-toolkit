@@ -159,7 +159,7 @@ mac-system-toolkit/
 | 文件 | 用途 | 行数 | 何时读取 |
 |------|------|------|---------|
 | `README.md` | 技能说明与架构 | 244行 | 想了解技能全貌时 |
-| `SKILL.md` | 主入口，触发后首先加载 | 149行 | 每次触发技能时 |
+| `SKILL.md` | 主入口，触发后首先加载 | 151行 | 每次触发技能时 |
 | `references/cu-plane-guide.md` | 统一桌面控制规范 | 222行 | 操作原生 App GUI 时 |
 | `references/chrome-app-control.md` | Chrome 内核应用控制（含 Gemini 按钮飞书指针） | 324行 | 操作 Chrome/VSCode/Electron 内部内容时 |
 | `references/window-management.md` | 窗口管理 | 139行 | 需要移动/resize/布局窗口时 |
@@ -241,4 +241,4 @@ A：CPU 温度/负载、内存压力、硬盘空间/SMART、网络连通性（�
 - 本技能采用分层架构，新增能力时先判断属于哪一层，放入对应模块
 - 新增 App 控制方法时，优先考虑是否能用现有层覆盖，不需要为每个 App 单独建模块
 - 脚本修改后需实际运行测试
-- 凭证类信息（如 power.sh 的 webhook token）只以 `.secrets/*.enc` 密文入库，明文绝不进 git；提交前可用 `scripts/audit-secrets.sh` 巡检
+- 凭证（密码 / token / API key）只以 `.secrets/*.enc` 密文入库、明文绝不进 git；统一约定与提交前巡检以 [secret-encryption.md](references/secret-encryption.md) 为唯一权威

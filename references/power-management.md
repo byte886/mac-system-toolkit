@@ -116,7 +116,7 @@ DELAY=30s
 
 ## 六、安全注意事项
 
-- **token 即钥匙**：webhook token 等于远程关机权限，只以 `.secrets/power_webhook.enc` 密文存在，`power.sh` 运行时解密、本身不含明文；明文绝不进 git（本仓已公开，更须守住）。
+- **token 即钥匙**：webhook token 等于远程关机 / 重启权限，属本功能最高风险点；其加密存放、运行时解密与提交规则统一遵循 [secret-encryption.md](secret-encryption.md)（本项目密文 `.secrets/power_webhook.enc`，`power.sh` 本身不含明文）。
 - **关机/重启不可逆**：触发前必须确认无未保存工作，先做豆包忙碌检测。
 - **默认延迟 30 秒**：不要改为 0 秒即时执行，给用户取消的机会。
 - **webhook 服务依赖**：确保 `com.user.powerwebhook` 和 `com.user.cloudflared-power` 服务在运行。检查：

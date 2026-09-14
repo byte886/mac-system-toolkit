@@ -144,9 +144,8 @@ ncdu /path/to/dir
 ## 注意事项
 
 - **cu plane 完整规范**：见系统内置 `computer-use-automation-mac` 技能，本技能的 cu-plane-guide 是要点提炼
-- **webhook 凭证**：`scripts/power.sh` 不含明文，运行时从 `.secrets/power_webhook.enc` 解密；明文绝不入库，仅 `.enc` 密文可提交（本仓已公开，红线见下条与 [secret-encryption.md](references/secret-encryption.md)）
 - **权限**：axcli/cu plane 需要「辅助功能」和「屏幕录制」权限
 - **项目特定流程**：高顿课程项目的做题/下载/视频流程在项目文档中，本技能只放通用方法
 - **Git 子模块规范**：维护 `~/Doubao/skills` 技能仓库群（submodule 增删/升级、指针漂移、新机器克隆）先读 [git-submodule-workflow.md](references/git-submodule-workflow.md)；改动遵循"先子后父"两次提交
 - **Chrome Gemini 按钮**：启用/修复直接按 [chrome-app-control.md §七](references/chrome-app-control.md) 指向的飞书文档操作，不重复建 Skill/脚本
-- **凭证加密红线**：任何密码 / token / API key / secret 需要落盘时，一律按 [secret-encryption.md](references/secret-encryption.md) 用 `scripts/secrets.sh` 加密（AES-256-CBC + PBKDF2，明文不进 git）；主密码只从 `ENC_PASS` 或交互输入获得，**不硬编码、不猜测，用户没给就问**
+- **凭证加密（唯一权威源 [secret-encryption.md](references/secret-encryption.md)）**：密码 / token / API key / secret 一律加密落盘、明文不进 git，用全局命令 `secrets`（源 `scripts/secrets.sh`）加解密、`audit-secrets.sh` 巡检；主密码只从 `ENC_PASS` 或交互输入获得，**不硬编码、不猜测，用户没给就问**
