@@ -66,4 +66,15 @@ echo "  submodule.recurse=true          pull/fetch/checkout 默认递归（clone
 echo
 print_current
 echo
+
+# 可选：若已安装 gita（多仓库总览工具），自动递归登记 ~/Doubao 仓库群
+DOUBAO_ROOT="${DOUBAO_ROOT:-$HOME/Doubao}"
+GITA=""
+if command -v gita >/dev/null 2>&1; then GITA="gita"
+elif [ -x "$HOME/Library/Python/3.14/bin/gita" ]; then GITA="$HOME/Library/Python/3.14/bin/gita"; fi
+if [ -n "$GITA" ] && [ -d "$DOUBAO_ROOT" ]; then
+  "$GITA" add -r "$DOUBAO_ROOT" >/dev/null 2>&1 \
+    && echo "已用 gita 递归登记 $DOUBAO_ROOT 下仓库（运行 'gita ll' 总览）"
+fi
+
 echo "完成。注意：这些是全局默认；全新克隆仍要记得 git clone --recurse-submodules。"

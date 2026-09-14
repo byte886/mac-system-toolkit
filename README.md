@@ -135,24 +135,30 @@ mac-system-toolkit/
 │   │                                          已知目录搜索、内容搜索、磁盘空间分析、决策流程、最佳实践
 │   │                                    来源：mac-file-search 迁移
 │   │
-│   └── git-submodule-workflow.md      # 开发环境专项：Git submodule 多仓库规范
-│                                        内容：技能仓库群拓扑、新机器克隆/全局配置、子模块增删升级、
-│                                              先子后父、指针漂移排查、submodule/subtree 对照、gita 可选
-│                                        来源：git 官方 + GitHub Training cheat sheet + 2026-09-14 本仓拆分经验
+│   ├── git-submodule-workflow.md      # 开发环境专项：Git submodule 多仓库规范
+│   │                                    内容：技能仓库群拓扑、新机器克隆/全局配置、子模块增删升级、
+│   │                                          先子后父、指针漂移排查、submodule/subtree 对照、gita 多仓总览
+│   │                                    来源：git 官方 + GitHub Training cheat sheet + 2026-09-14 本仓拆分经验
+│   │
+│   └── secret-encryption.md           # 开发环境专项：凭证/密码统一加密约定
+│                                        内容：AES-256-CBC+PBKDF2 统一算法、全局/项目两级 .enc 存放、
+│                                              主密码来源红线、业务脚本运行时解密范式、新机器恢复
+│                                        来源：高顿 secrets.sh 同范式提炼，2026-09-14
 │
 └── scripts/                           # 可执行脚本
-    ├── power.sh                        # 关机/重启（Cloudflare webhook，默认30秒延迟可取消）
+    ├── power.sh                        # 关机/重启（Cloudflare webhook，token 加密于 .secrets，默认30秒延迟可取消）
+    ├── secrets.sh                      # 统一凭证加解密工具（encrypt/decrypt/set/get/path）
     ├── check_temp.sh                   # 温度检测（iStats 自动安装 + CPU/GPU/风扇温度）
     ├── health_check.sh                 # 综合健康检查（一键体检，支持 --full / --json）
-    └── setup-git-submodule-global.sh   # 新机器一键配置 submodule 全局默认项（幂等，可 --unset）
+    └── setup-git-submodule-global.sh   # 新机器一键配置 submodule 全局默认项 + gita 自动登记（幂等，可 --unset）
 ```
 
 ### 文件清单表
 
 | 文件 | 用途 | 行数 | 何时读取 |
 |------|------|------|---------|
-| `README.md` | 技能说明与架构 | 228行 | 想了解技能全貌时 |
-| `SKILL.md` | 主入口，触发后首先加载 | 143行 | 每次触发技能时 |
+| `README.md` | 技能说明与架构 | 238行 | 想了解技能全貌时 |
+| `SKILL.md` | 主入口，触发后首先加载 | 149行 | 每次触发技能时 |
 | `references/cu-plane-guide.md` | 统一桌面控制规范 | 222行 | 操作原生 App GUI 时 |
 | `references/chrome-app-control.md` | Chrome 内核应用控制（含 Gemini 按钮飞书指针） | 324行 | 操作 Chrome/VSCode/Electron 内部内容时 |
 | `references/window-management.md` | 窗口管理 | 139行 | 需要移动/resize/布局窗口时 |
@@ -160,11 +166,13 @@ mac-system-toolkit/
 | `references/health-check.md` | 硬件健康检查 | 212行 | 查温度/硬件状态/电脑健康时 |
 | `references/vpn-control.md` | VPN/代理控制 | 355行 | 开关 VPN/设置代理/查网络时 |
 | `references/file-search.md` | 文件搜索 | 183行 | 找文件/搜索内容/磁盘空间分析时 |
-| `references/git-submodule-workflow.md` | Git submodule 多仓库规范 | 290行 | 维护技能仓库群/子模块增删升级/新机器配置时 |
-| `scripts/power.sh` | 关机重启脚本 | 24行 | 执行关机/重启时 |
+| `references/git-submodule-workflow.md` | Git submodule 多仓库规范（含 gita） | 335行 | 维护技能仓库群/子模块/多仓总览/新机器配置时 |
+| `references/secret-encryption.md` | 凭证/密码统一加密约定 | 121行 | 任何密码/token/密钥需要落盘或取用時 |
+| `scripts/power.sh` | 关机重启脚本（token 运行时解密） | 29行 | 执行关机/重启时 |
+| `scripts/secrets.sh` | 统一凭证加解密工具 | 85行 | 加密/解密/存取密码 token 时 |
 | `scripts/check_temp.sh` | 温度检测脚本 | 83行 | 检测温度时 |
 | `scripts/health_check.sh` | 综合体检脚本 | 276行 | 一键健康检查时 |
-| `scripts/setup-git-submodule-global.sh` | 新机器 submodule 全局配置（幂等） | 69行 | 在新机器配置 git 全局默认项时 |
+| `scripts/setup-git-submodule-global.sh` | 新机器 submodule 全局配置 + gita 登记（幂等） | 80行 | 在新机器配置 git 全局默认项时 |
 
 ---
 
@@ -198,6 +206,8 @@ bash "$SKILL_DIR/scripts/power.sh restart 30"
 - 找文件、搜索文件、文件在哪、哪个文件包含、磁盘空间、为什么磁盘满了
 - 窗口管理、双屏布局、分屏
 - Git submodule、子模块、技能仓库拆分、指针漂移、批量管理多个 git 仓库、新机器克隆技能仓库
+- gita、一屏看所有仓库状态、多仓库总览/批量拉取
+- 凭证/token/密码/API key 加密存储、密钥解密、sudo 密码保存、明文不入 git
 
 ---
 

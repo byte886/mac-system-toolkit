@@ -258,26 +258,71 @@ git subtree push --prefix=dir <url> main
 
 ---
 
-## 8. 可选增强：gita（非必需，先理解再决定装不装）
+## 8. 多仓库总览工具：gita（已采用）
 
-**gita 是什么**：一个 Python 写的命令行小工具（[nosarthur/gita](https://github.com/nosarthur/gita)），专门解决原生 git 的一个短板——**没法一屏总览多个平级仓库的状态**。`git submodule status` 只显示"指针对没对齐"，不显示每个子仓当前分支、是否有未提交改动、相对远程 ahead/behind；gita 补的就是这块"仪表盘"。
+### 8.1 它解决原生 git 的什么短板
 
-**它能做什么**：
+`git submodule status` 只回答"指针对没对齐"，**不显示每个仓当前分支、有没有未提交改动、相对远程 ahead/behind**；想巡检 11 个仓只能逐个 `cd` 进去看。gita（[nosarthur/gita](https://github.com/nosarthur/gita)）就是补上这块的"仪表盘 + 批量遥控器"：一屏列出所有仓库，并对它们批量执行 git 命令。它**不替代 submodule**，而是建在其上的便捷外壳。
+
+### 8.2 安装
+
+Apple Silicon 可直接 `brew install gita`。**本机是 Intel Mac，Homebrew 已不再提供 Intel 预编译包**（会触发 openssl/xz 源码编译），实测用独立 venv + 软链最干净、不污染系统 Python：
 
 ```bash
-brew install gita                 # 或 pip3 install -U gita
-gita add -r ~/Doubao               # 递归把 skills 下所有子仓登记进来
-gita ll                            # 一屏列出每个仓：分支、脏标记、ahead/behind、commit
-gita fetch                         # 对登记的所有仓批量 fetch
-gita pull                          # 批量 pull
-gita exec "git switch main"        # 对所有仓批量执行任意 git 命令
+mkdir -p ~/.local/venvs ~/.local/bin
+/usr/local/bin/python3 -m venv ~/.local/venvs/gita
+~/.local/venvs/gita/bin/pip install -U pip gita
+ln -sf ~/.local/venvs/gita/bin/gita ~/.local/bin/gita   # ~/.local/bin 已在 PATH
+gita --version
 ```
 
-**为什么标为"可选"而非推荐必装**：
+### 8.3 登记仓库群（一次）
 
-- 本规范 §3 的 `git submodule foreach --recursive` 已能覆盖批量操作，`submodule status` + 全局摘要配置也能看指针，**不装 gita 完全不影响这套工作流**；
-- 只有当你经常想"像看仪表盘一样一眼扫全部 11 个仓的分支/脏/ahead-behind"时，gita 才明显省事；
-- 它与 submodule 不冲突，只是平级多仓库的便捷外壳，装不装都可以。
+```bash
+gita add -r ~/Doubao        # 递归登记：根仓 + skills 全部子模块 + chats 下独立仓
+gita ls                     # 列出已登记仓库名
+```
+> 新机器跑 `scripts/setup-git-submodule-global.sh` 时，若检测到已装 gita 会自动执行这步登记。
+
+### 8.4 日常命令
+
+| 命令 | 作用 |
+|------|------|
+| `gita ll` | **总览**：每仓一行——名称 / 分支 / 状态符 / 最近提交 |
+| `gita ls` | 只列已登记仓库名 |
+| `gita st` | 对所有仓批量 `git status` |
+| `gita fetch` / `gita pull` / `gita push` | 对所有仓批量执行；后接仓库名可只针对部分：`gita pull okf-wiki` |
+| `gita br` | 批量查看各仓分支 |
+| `gita log` / `gita last` | 批量查看提交 |
+| `gita shell` | 进入对所有仓执行任意 git 命令的交互 |
+| `gita rm <name>` | 取消登记（只移除 gita 记录，不删磁盘文件） |
+
+### 8.5 `gita ll` 状态符含义
+
+| 符号 | 含义 |
+|---|---|
+| `[]` | 工作区干净、与远程同步 |
+| `*` | 有未提交修改 |
+| `?` | 有未跟踪文件 |
+| `>` / `<` / `=` | 领先远程 / 落后远程 / 已分叉 |
+| `$` | 有 stash |
+
+### 8.6 本机实测效果（2026-09-14）
+
+```
+Doubao              main   [*]   chore: 升级 mac-system-toolkit 子模块 (24 min ago)
+captcha-reader      main   []    chore: 初始化仓库 ... (4 days ago)
+mac-system-toolkit  main   [*?]  docs: 新增 submodule 规范 ... (25 min ago)
+wechat-control      main   []    docs: 路径引用 wxc -> wechat-control (69 min ago)
+wx-cli              main   []    feat: 支持多账号 ... (3 days ago)
+...（共 14 行）
+```
+一眼可见：绝大多数仓 `[]` 干净，正在改的 `mac-system-toolkit` 是 `[*?]`（有改动+新文件），根仓因子模块在改显示 `[*]`——不用进目录就完成巡检。
+
+### 8.7 与原生 submodule 命令的分工
+
+- **克隆、增删子模块、指针升级、改名/删除、故障排查** → 用本文件 §2–§5 的**原生 `git submodule`**（这些 gita 不管）；
+- **一屏总览状态、批量 fetch/pull、跨仓巡检** → 用 **gita**。
 
 ---
 

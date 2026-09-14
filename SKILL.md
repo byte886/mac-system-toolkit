@@ -44,6 +44,7 @@ compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。�
 | 需求 | 直接读 |
 |------|--------|
 | Git submodule / 技能仓库群维护（克隆、子模块增删升级、指针漂移、新机器配置、批量多仓） | [git-submodule-workflow.md](references/git-submodule-workflow.md) |
+| 密码 / token / API key 等凭证加密存储与取用（sudo 密码、GitHub PAT、webhook、平台密钥） | [secret-encryption.md](references/secret-encryption.md)，工具 `scripts/secrets.sh` |
 | Chrome「Gemini in Chrome」按钮启用 / 修复 | [chrome-app-control.md §七](references/chrome-app-control.md)（按其中飞书文档处理，不重复造脚本） |
 
 ## 系统环境
@@ -76,6 +77,10 @@ bash "$SKILL_DIR/scripts/power.sh restart 30"
 
 # 新机器一键配置 git submodule 全局默认项（幂等，详见 git-submodule-workflow.md）
 bash "$SKILL_DIR/scripts/setup-git-submodule-global.sh"
+
+# 凭证加密/解密（统一约定，详见 secret-encryption.md；主密码取 ENC_PASS 或交互输入）
+bash "$SKILL_DIR/scripts/secrets.sh" get <name>              # 取全局凭证 ~/.doubao/secrets/<name>.enc
+bash "$SKILL_DIR/scripts/secrets.sh" decrypt .secrets/x.enc  # 解项目内密文
 ```
 
 ### 常用命令
@@ -141,3 +146,4 @@ ncdu /path/to/dir
 - **项目特定流程**：高顿课程项目的做题/下载/视频流程在项目文档中，本技能只放通用方法
 - **Git 子模块规范**：维护 `~/Doubao/skills` 技能仓库群（submodule 增删/升级、指针漂移、新机器克隆）先读 [git-submodule-workflow.md](references/git-submodule-workflow.md)；改动遵循"先子后父"两次提交
 - **Chrome Gemini 按钮**：启用/修复直接按 [chrome-app-control.md §七](references/chrome-app-control.md) 指向的飞书文档操作，不重复建 Skill/脚本
+- **凭证加密红线**：任何密码 / token / API key / secret 需要落盘时，一律按 [secret-encryption.md](references/secret-encryption.md) 用 `scripts/secrets.sh` 加密（AES-256-CBC + PBKDF2，明文不进 git）；主密码只从 `ENC_PASS` 或交互输入获得，**不硬编码、不猜测，用户没给就问**

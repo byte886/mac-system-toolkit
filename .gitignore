@@ -1,0 +1,13 @@
+# 系统/编辑器垃圾
+.DS_Store
+__pycache__/
+*.pyc
+
+# --- 凭证：明文绝不入库，仅 .secrets 下 .enc 加密件放行（约定见 references/secret-encryption.md）---
+.secrets/*.json
+.secrets/*.txt
+.secrets/*.raw
+.secrets/*.key
+.secrets/*.pem
+.secrets/*.token
+!*.enc
