@@ -305,7 +305,15 @@ osascript /path/to/scripts/cdp/press_allow.applescript
 
 ---
 
-## 七、注意事项
+## 七、Chrome Gemini 按钮启用 / 修复（直接查飞书，不重复造轮子）
+
+- 涉及 Chrome「Gemini in Chrome」按钮的**启用 / 修复**操作，**直接参考飞书知识库文档，不再重复创建本地 Skill 或脚本**：
+  - <https://zcnjheoajxng.feishu.cn/wiki/LrqqwwVZiiIaAXk9C7vcOFM0nsf>
+- 该规则与全局 `~/Doubao/AGENTS.md` 第五章一致；飞书文档是唯一维护处，本技能只放指针（DRY，不复制内容）。
+
+---
+
+## 八、注意事项
 
 1. **Token 安全**：`PLAYWRIGHT_MCP_EXTENSION_TOKEN` 是敏感信息，不要硬编码到公开脚本
 2. **会话隔离**：不同项目用不同会话名，避免冲突

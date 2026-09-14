@@ -1,6 +1,6 @@
 ---
 name: mac-system-toolkit
-description: "Mac 系统工具箱：一体化整合桌面控制、浏览器自动化、窗口管理、电源管理、硬件健康检查、VPN代理控制、文件搜索七大能力。分层架构：统一桌面控制（cu plane/axcli/AppleScript）、Chrome内核应用控制（bu/Playwright/CDP/MCP）、窗口管理（Spectacle/AppleScript）、专项功能（电源管理/硬件健康检查/VPN代理控制/文件搜索）。当用户要求操作电脑、打开切换应用、点击界面、关机重启、查豆包状态、查温度、电脑健康检查、风扇转速、VPN开关、代理设置、网络检查、窗口管理、双屏布局、分屏、找文件、搜索文件、文件在哪、哪个文件包含、磁盘空间、为什么磁盘满了等任何 Mac 系统相关操作时使用。仅适用于 macOS。"
+description: "Mac 系统工具箱：一体化整合桌面控制、浏览器自动化、窗口管理、电源管理、硬件健康检查、VPN代理控制、文件搜索七大能力。分层架构：统一桌面控制（cu plane/axcli/AppleScript）、Chrome内核应用控制（bu/Playwright/CDP/MCP）、窗口管理（Spectacle/AppleScript）、专项功能（电源管理/硬件健康检查/VPN代理控制/文件搜索）。当用户要求操作电脑、打开切换应用、点击界面、关机重启、查豆包状态、查温度、电脑健康检查、风扇转速、VPN开关、代理设置、网络检查、窗口管理、双屏布局、分屏、找文件、搜索文件、文件在哪、哪个文件包含、磁盘空间、为什么磁盘满了等任何 Mac 系统相关操作时使用。另承载 Git 多仓库 / submodule 管理规范（技能仓库群的克隆、子模块增删与升级、指针同步、新机器配置），当提到 git submodule、子模块、技能仓库拆分、指针漂移、批量管理多个 git 仓库时也使用。Mac 操作仅适用于 macOS，Git 规范本身跨平台。"
 compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。执行前先判平台(uname -s 返回 Darwin)，非 macOS 停止并告知需另行适配、不硬跑；将来补齐 Windows 后仍按平台分流并分别标注验证状态。本机依赖：axcli(cargo)、Node.js Playwright、cu plane、iStats、fd/ripgrep/ncdu。"
 ---
 
@@ -39,6 +39,13 @@ compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。�
 
 **核心原则**：能简单就不复杂；能元素级就不坐标级；cu plane 是重武器，单步操作不要用大炮打蚊子。
 
+### 专项文档路由（非桌面操作）
+
+| 需求 | 直接读 |
+|------|--------|
+| Git submodule / 技能仓库群维护（克隆、子模块增删升级、指针漂移、新机器配置、批量多仓） | [git-submodule-workflow.md](references/git-submodule-workflow.md) |
+| Chrome「Gemini in Chrome」按钮启用 / 修复 | [chrome-app-control.md §七](references/chrome-app-control.md)（按其中飞书文档处理，不重复造脚本） |
+
 ## 系统环境
 
 - **显示器**：2× 1920×1200（左屏 x=0-1920，右屏 x=1920-3840）
@@ -66,6 +73,9 @@ bash "$SKILL_DIR/scripts/power.sh shutdown 30"
 
 # 重启（30秒延迟可取消）
 bash "$SKILL_DIR/scripts/power.sh restart 30"
+
+# 新机器一键配置 git submodule 全局默认项（幂等，详见 git-submodule-workflow.md）
+bash "$SKILL_DIR/scripts/setup-git-submodule-global.sh"
 ```
 
 ### 常用命令
@@ -129,3 +139,5 @@ ncdu /path/to/dir
 - **敏感 token**：`scripts/power.sh` 含 Cloudflare webhook token，禁止提交到公开 Git 仓库
 - **权限**：axcli/cu plane 需要「辅助功能」和「屏幕录制」权限
 - **项目特定流程**：高顿课程项目的做题/下载/视频流程在项目文档中，本技能只放通用方法
+- **Git 子模块规范**：维护 `~/Doubao/skills` 技能仓库群（submodule 增删/升级、指针漂移、新机器克隆）先读 [git-submodule-workflow.md](references/git-submodule-workflow.md)；改动遵循"先子后父"两次提交
+- **Chrome Gemini 按钮**：启用/修复直接按 [chrome-app-control.md §七](references/chrome-app-control.md) 指向的飞书文档操作，不重复建 Skill/脚本
