@@ -125,7 +125,7 @@ mac-system-toolkit/
 │   │                                    来源：mac-hardware-temp 扩展
 │   │
 │   ├── vpn-control.md                 # 第四层：VPN/代理控制
-│   │                                    内容：网络环境检测与决策逻辑、ClashX Pro 菜单栏交互、
+│   │                                    内容：网络环境检测与决策逻辑、代理客户端菜单栏交互、
 │   │                                          代理环境变量设置/取消、各工具代理配置（git/npm/cargo/pip）、
 │   │                                          增强模式(TUN)、系统 VPN 配置、常见问题排查、判断清单
 │   │                                    来源：原 mac-desktop-control 零散内容 + proxy-manager 整合
@@ -156,25 +156,27 @@ mac-system-toolkit/
 
 ### 文件清单表
 
-| 文件 | 用途 | 行数 | 何时读取 |
-|------|------|------|---------|
-| `README.md` | 技能说明与架构 | 244行 | 想了解技能全貌时 |
-| `SKILL.md` | 主入口，触发后首先加载 | 151行 | 每次触发技能时 |
-| `references/cu-plane-guide.md` | 统一桌面控制规范 | 222行 | 操作原生 App GUI 时 |
-| `references/chrome-app-control.md` | Chrome 内核应用控制（含 Gemini 按钮飞书指针） | 324行 | 操作 Chrome/VSCode/Electron 内部内容时 |
-| `references/window-management.md` | 窗口管理 | 139行 | 需要移动/resize/布局窗口时 |
-| `references/power-management.md` | 电源管理 | 125行 | 关机/重启/查豆包状态时 |
-| `references/health-check.md` | 硬件健康检查 | 212行 | 查温度/硬件状态/电脑健康时 |
-| `references/vpn-control.md` | VPN/代理控制 | 355行 | 开关 VPN/设置代理/查网络时 |
-| `references/file-search.md` | 文件搜索 | 183行 | 找文件/搜索内容/磁盘空间分析时 |
-| `references/git-submodule-workflow.md` | Git submodule 多仓库规范（含 gita） | 335行 | 维护技能仓库群/子模块/多仓总览/新机器配置时 |
-| `references/secret-encryption.md` | 凭证/密码统一加密约定（全局唯一工具） | 165行 | 任何密码/token/密钥需要落盘或取用時 |
-| `scripts/power.sh` | 关机重启脚本（token 运行时解密） | 29行 | 执行关机/重启时 |
-| `scripts/secrets.sh` | 全局唯一凭证加解密工具（`install` 装为全局命令 secrets） | 111行 | 加密/解密/存取密码 token 时 |
-| `scripts/audit-secrets.sh` | 多仓明文密钥巡检（目录参数化、不内置真实密码；退出码 0干净/1待确认/2高置信） | 102行 | 提交前/换机/定期自检是否有明文凭证时 |
-| `scripts/check_temp.sh` | 温度检测脚本 | 83行 | 检测温度时 |
-| `scripts/health_check.sh` | 综合体检脚本 | 276行 | 一键健康检查时 |
-| `scripts/setup-git-submodule-global.sh` | 新机器 submodule 全局配置 + gita 登记 + secrets 全局命令（幂等） | 84行 | 在新机器配置 git 全局默认项时 |
+> 不标注行数：行数随编辑频繁变化、参考价值低，需要时用 `wc -l <file>` 现查。
+
+| 文件 | 用途 | 何时读取 |
+|------|------|---------|
+| `README.md` | 技能说明与架构 | 想了解技能全貌时 |
+| `SKILL.md` | 主入口，触发后首先加载 | 每次触发技能时 |
+| `references/cu-plane-guide.md` | 统一桌面控制规范 | 操作原生 App GUI 时 |
+| `references/chrome-app-control.md` | Chrome 内核应用控制（含 Gemini 按钮飞书指针） | 操作 Chrome/VSCode/Electron 内部内容时 |
+| `references/window-management.md` | 窗口管理 | 需要移动/resize/布局窗口时 |
+| `references/power-management.md` | 电源管理 | 关机/重启/查豆包状态时 |
+| `references/health-check.md` | 硬件健康检查 | 查温度/硬件状态/电脑健康时 |
+| `references/vpn-control.md` | VPN/代理控制（端口/客户端以本机实测为准） | 开关 VPN/设置代理/查网络时 |
+| `references/file-search.md` | 文件搜索 | 找文件/搜索内容/磁盘空间分析时 |
+| `references/git-submodule-workflow.md` | Git submodule 多仓库规范（含 gita） | 维护技能仓库群/子模块/多仓总览/新机器配置时 |
+| `references/secret-encryption.md` | 凭证/密码统一加密约定（全局唯一工具） | 任何密码/token/密钥需要落盘或取用時 |
+| `scripts/power.sh` | 关机重启脚本（token 运行时解密，默认 30 秒延迟可取消） | 执行关机/重启时 |
+| `scripts/secrets.sh` | 全局唯一凭证加解密工具（`install` 装为全局命令 secrets） | 加密/解密/存取密码 token 时 |
+| `scripts/audit-secrets.sh` | 多仓明文密钥巡检（目录参数化、不内置真实密码；退出码 0干净/1待确认/2高置信） | 提交前/换机/定期自检是否有明文凭证时 |
+| `scripts/check_temp.sh` | 温度检测脚本 | 检测温度时 |
+| `scripts/health_check.sh` | 综合体检脚本（代理端口自动探测，支持 --full / --json） | 一键健康检查时 |
+| `scripts/setup-git-submodule-global.sh` | 新机器 submodule 全局配置 + gita 登记 + secrets 全局命令（幂等） | 在新机器配置 git 全局默认项时 |
 
 ---
 

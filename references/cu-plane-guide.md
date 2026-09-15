@@ -149,7 +149,7 @@ $AXCLI --app "AppName" press "Escape"
 ### 典型场景
 
 axcli 适用于已知坐标/选择器的单步快速操作。具体 App 的完整操作流程见对应模块：
-- **ClashX Pro 菜单栏交互** → 见 [vpn-control.md](vpn-control.md)
+- **代理客户端（ClashX Pro / ClashVerge）菜单栏交互** → 见 [vpn-control.md](vpn-control.md)
 - **Alfred 搜索** → 通用示例：
 
 ```bash

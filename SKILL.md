@@ -49,10 +49,10 @@ compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。�
 
 ## 系统环境
 
-- **显示器**：2× 1920×1200（左屏 x=0-1920，右屏 x=1920-3840）
+- **显示器/坐标**：分辨率、屏幕数量与排列因机而异，涉及坐标布局前先用 `system_profiler SPDisplaysDataType` 实测，勿照抄他机坐标（窗口坐标详见 window-management.md）
 - **Dock**：底部自动隐藏，预留 ~90px
-- **ClashX 代理**：`http://127.0.0.1:7890`（HTTP），`socks5://127.0.0.1:7890`
-- **Node.js**：nvm v24.9.0 at `~/.nvm/versions/node/v24.9.0/bin/node`
+- **代理客户端/端口**：因机而异、不写死（一台 ClashX/7890、另一台 ClashVerge/7897）；先按 [vpn-control.md](references/vpn-control.md) 的「端口约定」探测并 `export PROXY_PORT=...`，命令统一写 `127.0.0.1:${PROXY_PORT:-7890}`
+- **Node.js**：用 `command -v node` / `node -v` 动态定位（nvm/brew 的安装位置与版本因机而异，不写死具体版本路径）
 - **axcli**：`~/.cargo/bin/axcli`
 - **技能目录**：`~/Doubao/skills/mac-system-toolkit`
 
@@ -105,7 +105,8 @@ osascript -e 'tell application "iTerm2" to tell current session of current windo
 osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true'
 
 # 终端代理（下载时）
-export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
+export PROXY_PORT=7897   # 先按 vpn-control.md 探测到本机端口（示例为 ClashVerge；ClashX 多为 7890）
+export https_proxy=http://127.0.0.1:$PROXY_PORT http_proxy=http://127.0.0.1:$PROXY_PORT all_proxy=socks5://127.0.0.1:$PROXY_PORT
 
 # 文件搜索（系统级，即时）
 mdfind -name "文件名"
@@ -125,7 +126,7 @@ ncdu /path/to/dir
 | VS Code | Electron，内部 DOM 需 CDP | CDP 直连 |
 | iTerm2 | 后台发命令不需激活 | AppleScript write text |
 | Doubao | Electron 聊天区 AX 不可见，需截图 | cu plane（多步任务） |
-| ClashX | 菜单栏-only，位置固定 | axcli（单步点击） |
+| 代理客户端（ClashX/ClashVerge） | 菜单栏-only，图标位置动态变化 | axcli（单步点击，坐标先发现） |
 | 其他原生 App | 无特殊点 | cu plane（默认） |
 
 ## 错误恢复速查
@@ -137,7 +138,7 @@ ncdu /path/to/dir
 | `CU_AX_APP_NOT_SURFACE` | 菜单栏-only App，cu 看不到 | fallback 到 axcli |
 | CDP connection refused | VS Code 未带调试端口启动 | Cmd+Q 后用 `--remote-debugging-port=9222` 重启 |
 | brew 卡住 | 残留 brew 锁 | `pkill -9 -f brew; rm -f ~/Library/Caches/Homebrew/downloads/*.incomplete` |
-| 终端 DNS 超时 | shell 未设代理 | `export https_proxy=http://127.0.0.1:7890` |
+| 终端 DNS 超时 | shell 未设代理 | 先 `export PROXY_PORT=<本机端口>`，再 `export https_proxy=http://127.0.0.1:$PROXY_PORT`（端口以实测为准） |
 | axcli 默认策略冻结 | `--strategy cg-pid` 有问题 | 用 `--strategy cg --activate --no-visual-cursor` |
 | 坐标点击多屏偏移 | 硬编码坐标/坐标系混用 | 改用元素级操作，或动态读元素 position 算中心 |
 

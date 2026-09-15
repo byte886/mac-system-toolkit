@@ -112,8 +112,8 @@ ping -c 3 -t 5 8.8.8.8
 # DNS 解析
 nslookup google.com 2>&1 | head -5
 
-# 代理连通性（如果启用）
-curl -s --connect-timeout 5 -x http://127.0.0.1:7890 https://www.google.com -o /dev/null -w "Google via proxy: %{http_code} %{time_total}s\n"
+# 代理连通性（如果启用；端口以本机实测为准：ClashX 常 7890、ClashVerge 常 7897，先 export PROXY_PORT，见 vpn-control.md）
+curl -s --connect-timeout 5 -x http://127.0.0.1:${PROXY_PORT:-7890} https://www.google.com -o /dev/null -w "Google via proxy: %{http_code} %{time_total}s\n"
 ```
 
 **判断标准**：

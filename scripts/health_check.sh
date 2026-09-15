@@ -219,18 +219,25 @@ else
   add_json "dns_status" "异常"
 fi
 
-# 代理连通性（如果 ClashX 在运行）
-if lsof -i :7890 &>/dev/null; then
-  PROXY_TEST=$(curl -s --connect-timeout 5 -x http://127.0.0.1:7890 https://www.google.com -o /dev/null -w "%{http_code}" 2>/dev/null || echo "000")
+# 代理连通性（端口自动探测，不写死：ClashX 常用 7890、ClashVerge 常用 7897、其它 1087/7891）
+# 可用环境变量 PROXY_PORT 显式指定；否则在常见端口里找第一个正在监听的
+PROXY_PORT="${PROXY_PORT:-}"
+if [ -z "$PROXY_PORT" ]; then
+  for p in 7890 7897 1087 7891; do
+    if lsof -i :$p &>/dev/null; then PROXY_PORT=$p; break; fi
+  done
+fi
+if [ -n "$PROXY_PORT" ]; then
+  PROXY_TEST=$(curl -s --connect-timeout 5 -x http://127.0.0.1:$PROXY_PORT https://www.google.com -o /dev/null -w "%{http_code}" 2>/dev/null || echo "000")
   if [ "$PROXY_TEST" = "200" ]; then
-    print_ok "代理连通（ClashX :7890）"
+    print_ok "代理连通（127.0.0.1:$PROXY_PORT）"
     add_json "proxy_status" "正常"
   else
-    print_warn "代理端口在监听但测试失败（HTTP $PROXY_TEST）"
+    print_warn "代理端口 $PROXY_PORT 在监听但测试失败（HTTP $PROXY_TEST）"
     add_json "proxy_status" "异常"
   fi
 else
-  echo "  代理: 未检测到 ClashX 运行"
+  echo "  代理: 未检测到本地代理端口监听（7890/7897/1087/7891）"
   add_json "proxy_status" "未运行"
 fi
 echo ""
