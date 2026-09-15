@@ -18,7 +18,7 @@ compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。�
 | 层级 | 工具 | 适用 |
 |------|------|------|
 | 第一层：统一桌面控制 | cu plane / axcli / AppleScript | 原生 App GUI 操作（默认入口） |
-| 第二层：Chrome 内核控制 | bu / Playwright / CDP / MCP | Chrome 网页、VS Code、Electron App 内部内容 |
+| 第二层：Chrome 内核控制 | bu / Playwright / Puppeteer / CDP / MCP | Chrome 网页、VS Code、Electron App 内部内容 |
 | 第三层：窗口管理 | Spectacle / AppleScript | 窗口移动/resize/双屏布局 |
 | 第四层：专项功能 | 脚本+文档 | 电源管理、健康检查、VPN控制、文件搜索 |
 
