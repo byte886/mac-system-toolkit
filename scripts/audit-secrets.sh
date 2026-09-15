@@ -12,7 +12,7 @@
 # 用法：
 #   audit-secrets.sh [起始目录]                 默认取 $AUDIT_ROOT，再否则当前目录
 #   audit-secrets.sh [目录] -p '自定义可疑正则'   追加高置信模式，可重复传
-#                                              （例如 -p '***REMOVED***'；真实密码不要写进本脚本）
+#                                              （例如 -p 'someSecret123'；不要把真实密码写进本脚本）
 #   audit-secrets.sh [目录] -w / --worktree     额外扫描工作区（含未提交改动）
 #   audit-secrets.sh -h
 #
