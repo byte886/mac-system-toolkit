@@ -87,11 +87,11 @@ do_install() {
 usage() {
   cat <<EOF
 Usage: $(basename "$0") <command> [args]
-  install                      安装全局命令软链到 $BIN_LINK（新机器一次）
+  install                      安装全局命令软链到 ${BIN_LINK}（新机器一次）
   encrypt <plain|-> [outfile]  加密字符串（- 从 stdin 读）
   decrypt <infile>             解密密文文件到 stdout
   json <infile> [field]        解密 JSON 密文，可选只取一个字段
-  set <name> <plain|->         加密存入全局目录 $GLOBAL_DIR
+  set <name> <plain|->         加密存入全局目录 ${GLOBAL_DIR}
   get <name>                   解密全局凭证
   path <name>                  打印全局凭证密文路径
 密码优先级：ENC_PASS > ENCRYPT_PASS(旧名兼容) > 交互输入；不硬编码、不猜测。
