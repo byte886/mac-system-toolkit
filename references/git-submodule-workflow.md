@@ -1,6 +1,6 @@
 # Git Submodule 多仓库操作规范（技能仓库群）
 
-> 适用对象：`~/Doubao`（远程 `git@github.com:byte886/doubao-skills.git`）这种**用 submodule 组织一组技能仓库**的工作区。
+> 适用对象：`~/Doubao`（远程 `git@github.com:byte886/doubao-workspace.git`）这种**用 submodule 组织一组技能仓库**的工作区。
 > 内容来源：git 官方文档 + GitHub Training《Submodule vs Subtree Cheat Sheet》要点沉淀 + 本仓库 2026-09-14 实际拆分经验。跨机器可直接照用。
 
 ---
@@ -23,7 +23,7 @@
 ## 1. 本仓库实际拓扑
 
 ```
-~/Doubao                         byte886/doubao-skills（父仓库, main）
+~/Doubao                         byte886/doubao-workspace（父仓库, main）
 └── skills/
     ├── captcha-reader           ── byte886/captcha-reader
     ├── face-detect              ── byte886/face-detect
@@ -57,7 +57,7 @@ ssh -T git@github.com        # 出现 "Hi byte886!" 即 OK
 
 ```bash
 # 全新克隆，一条命令带齐所有层级（含 wechat-control 内嵌 wx-cli）
-git clone --recurse-submodules git@github.com:byte886/doubao-skills.git
+git clone --recurse-submodules git@github.com:byte886/doubao-workspace.git
 ```
 
 已经普通 clone、子模块目录是空的，补拉：
@@ -266,23 +266,41 @@ git subtree push --prefix=dir <url> main
 
 ### 8.2 安装
 
-Apple Silicon 可直接 `brew install gita`。**本机是 Intel Mac，Homebrew 已不再提供 Intel 预编译包**（会触发 openssl/xz 源码编译），实测用独立 venv + 软链最干净、不污染系统 Python：
+统一用 **Homebrew 全局安装**（两台 Intel 黑苹果实测，2026-09-15），命令落到 `/usr/local/bin/gita`（Apple Silicon 为 `/opt/homebrew/bin/gita`），由 brew 统一升级/卸载，**不要再用手工 venv + 软链**。
+
+gita 是纯 Python 小包，homebrew-core 提供 Intel bottle（约 626KB），运行时直接复用 brew 的 python@3.14。**关键加 `--ignore-dependencies`**：不加时 brew 会顺带把 python@3.14 的链式依赖（openssl/xz/sqlite）当过期项升级，而这些在 Intel 黑苹果上常无匹配 bottle、回退源码编译（很慢、易失败）；依赖本就齐备，无需重装。
 
 ```bash
-mkdir -p ~/.local/venvs ~/.local/bin
-/usr/local/bin/python3 -m venv ~/.local/venvs/gita
-~/.local/venvs/gita/bin/pip install -U pip gita
-ln -sf ~/.local/venvs/gita/bin/gita ~/.local/bin/gita   # ~/.local/bin 已在 PATH
-gita --version
+# 交互终端：30-brew.zsh 已配中科大镜像，直接：
+brew install --ignore-dependencies gita
+gita --version            # 期望 gita 0.16.8.2+
+which gita                # Intel -> /usr/local/bin/gita
 ```
+
+非交互 shell（ssh、AI 自动化）不加载 30-brew.zsh，必须显式带上国内镜像，否则 bottle 走 ghcr.io 国外会龟速：
+
+```bash
+export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
+export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
+export HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_AUTO_UPDATE=1
+brew install --ignore-dependencies gita
+```
+
+维护：`brew upgrade gita` / `brew uninstall gita`。纳管清单存 `~/.config/gita/repos.csv`（**机器相关、不入库**；换机要么重新登记，要么拷贝后把里面的家目录名整体替换 wenjiechen↔chenwenjie）。
+
+> 已废弃旧装法 `python3 -m venv ~/.local/venvs/gita` + 软链到 `~/.local/bin`：不是全局、要自己维护、还会因 PATH 顺序与 `/usr/local/bin` 打架。两台机器已于 2026-09-15 统一为 brew 全局并删除旧 venv。
 
 ### 8.3 登记仓库群（一次）
 
 ```bash
-gita add -r ~/Doubao        # 递归登记：根仓 + skills 全部子模块 + chats 下独立仓
+gita add -r ~/Doubao        # 递归登记：根仓 + skills 全部子模块 + 嵌套仓(wx-cli) + chats 下独立仓
 gita ls                     # 列出已登记仓库名
 ```
-> 新机器跑 `scripts/setup-git-submodule-global.sh` 时，若检测到已装 gita 会自动执行这步登记。
+
+- 递归 `-r` 幂等：已登记的不重复，新增 git 仓下次再跑会补上；它会把 `chats/` 下业务仓也纳入（如 gaodun 只在 .9 上，故 .9 纳管 14 个、本机 13 个，属正常差异）。
+- 想精确控制就逐个显式 `gita add <repo路径>`（只登记真实存在的 git 仓，不存在的路径会报错、跳过即可）。
+
+> 新机器跑 `scripts/setup-git-submodule-global.sh` 时，若检测到已装 gita 会自动执行递归登记。
 
 ### 8.4 日常命令
 
@@ -307,17 +325,9 @@ gita ls                     # 列出已登记仓库名
 | `>` / `<` / `=` | 领先远程 / 落后远程 / 已分叉 |
 | `$` | 有 stash |
 
-### 8.6 本机实测效果（2026-09-14）
+### 8.6 怎么读结果（状态巡检）
 
-```
-Doubao              main   [*]   chore: 升级 mac-system-toolkit 子模块 (24 min ago)
-captcha-reader      main   []    chore: 初始化仓库 ... (4 days ago)
-mac-system-toolkit  main   [*?]  docs: 新增 submodule 规范 ... (25 min ago)
-wechat-control      main   []    docs: 路径引用 wxc -> wechat-control (69 min ago)
-wx-cli              main   []    feat: 支持多账号 ... (3 days ago)
-...（共 14 行）
-```
-一眼可见：绝大多数仓 `[]` 干净，正在改的 `mac-system-toolkit` 是 `[*?]`（有改动+新文件），根仓因子模块在改显示 `[*]`——不用进目录就完成巡检。
+`gita ll` 每仓一行：技能子模块多处于 detached HEAD、无远程跟踪时显示 `∅`；在分支上且干净同步显示 `[]`；正在改的仓出现 `[*?]`（修改+未跟踪），根仓因子模块在改也会变 `[*]`。不用逐个 `cd` 进目录即可完成全仓巡检，状态符含义见 §8.5。
 
 ### 8.7 与原生 submodule 命令的分工
 

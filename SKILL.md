@@ -43,7 +43,7 @@ compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。�
 
 | 需求 | 直接读 |
 |------|--------|
-| Git submodule / 技能仓库群维护（克隆、子模块增删升级、指针漂移、新机器配置、批量多仓） | [git-submodule-workflow.md](references/git-submodule-workflow.md) |
+| Git submodule / 技能仓库群维护（克隆、子模块增删升级、指针漂移、新机器配置、批量多仓、gita 一屏总览） | [git-submodule-workflow.md](references/git-submodule-workflow.md) |
 | 密码 / token / API key 等凭证加密存储与取用（sudo 密码、GitHub PAT、webhook、平台密钥） | [secret-encryption.md](references/secret-encryption.md)，工具 `scripts/secrets.sh` |
 | Chrome「Gemini in Chrome」按钮启用 / 修复 | [chrome-app-control.md §七](references/chrome-app-control.md)（按其中飞书文档处理，不重复造脚本） |
 

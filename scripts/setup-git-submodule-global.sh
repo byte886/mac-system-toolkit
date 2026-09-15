@@ -71,7 +71,8 @@ echo
 DOUBAO_ROOT="${DOUBAO_ROOT:-$HOME/Doubao}"
 GITA=""
 if command -v gita >/dev/null 2>&1; then GITA="gita"
-elif [ -x "$HOME/Library/Python/3.14/bin/gita" ]; then GITA="$HOME/Library/Python/3.14/bin/gita"; fi
+elif [ -x /usr/local/bin/gita ]; then GITA=/usr/local/bin/gita        # Intel Homebrew 全局
+elif [ -x /opt/homebrew/bin/gita ]; then GITA=/opt/homebrew/bin/gita; fi # Apple Silicon
 if [ -n "$GITA" ] && [ -d "$DOUBAO_ROOT" ]; then
   "$GITA" add -r "$DOUBAO_ROOT" >/dev/null 2>&1 \
     && echo "已用 gita 递归登记 $DOUBAO_ROOT 下仓库（运行 'gita ll' 总览）"
