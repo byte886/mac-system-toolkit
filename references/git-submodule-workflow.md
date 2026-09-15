@@ -288,8 +288,6 @@ brew install --ignore-dependencies gita
 
 维护：`brew upgrade gita` / `brew uninstall gita`。纳管清单存 `~/.config/gita/repos.csv`（**机器相关、不入库**；换机要么重新登记，要么拷贝后把里面的家目录名整体替换 wenjiechen↔chenwenjie）。
 
-> 已废弃旧装法 `python3 -m venv ~/.local/venvs/gita` + 软链到 `~/.local/bin`：不是全局、要自己维护、还会因 PATH 顺序与 `/usr/local/bin` 打架。两台机器已于 2026-09-15 统一为 brew 全局并删除旧 venv。
-
 ### 8.3 登记仓库群（一次）
 
 ```bash
