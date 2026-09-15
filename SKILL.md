@@ -1,152 +1,78 @@
 ---
 name: mac-system-toolkit
-description: "Mac 系统工具箱：一体化整合桌面控制、浏览器自动化、窗口管理、电源管理、硬件健康检查、VPN代理控制、文件搜索七大能力。分层架构：统一桌面控制（cu plane/axcli/AppleScript）、Chrome内核应用控制（bu/Playwright/CDP/MCP）、窗口管理（Spectacle/AppleScript）、专项功能（电源管理/硬件健康检查/VPN代理控制/文件搜索）。当用户要求操作电脑、打开切换应用、点击界面、关机重启、查豆包状态、查温度、电脑健康检查、风扇转速、VPN开关、代理设置、网络检查、窗口管理、双屏布局、分屏、找文件、搜索文件、文件在哪、哪个文件包含、磁盘空间、为什么磁盘满了等任何 Mac 系统相关操作时使用。另承载 Git 多仓库 / submodule 管理规范（技能仓库群的克隆、子模块增删与升级、指针同步、新机器配置），当提到 git submodule、子模块、技能仓库拆分、指针漂移、批量管理多个 git 仓库时也使用。Mac 操作仅适用于 macOS，Git 规范本身跨平台。"
-compatibility: "仅在 macOS(Darwin) 实测可用；Windows/Linux 未适配。执行前先判平台(uname -s 返回 Darwin)，非 macOS 停止并告知需另行适配、不硬跑；将来补齐 Windows 后仍按平台分流并分别标注验证状态。本机依赖：axcli(cargo)、Node.js Playwright、cu plane、iStats、fd/ripgrep/ncdu。"
+description: "Mac 系统工具箱：桌面/GUI 自动化、Chrome 内核应用控制、窗口管理、电源与硬件健康、VPN 与代理控制、文件搜索，以及 Git submodule 多仓库群维护。当用户要操作 Mac、打开/切换/点击应用、关机重启、查温度或电脑健康、VPN 开关与代理设置、窗口分屏双屏、找文件或查磁盘，或提到 git submodule、子模块、多仓库批量管理、gita 时使用。仅 macOS。"
+compatibility: "仅 macOS(Darwin) 实测；执行前先 `uname -s` 判平台，非 macOS 停步告知不硬跑。依赖 axcli(cargo)、Node Playwright、cu plane、iStats、fd/ripgrep/ncdu。"
 ---
 
 # Mac System Toolkit — Mac 系统工具箱
 
+> 一句话：把"操作 Mac 系统 + 维护技能仓库群"这件事，按四层控制与一份 Git 规范收齐；具体怎么做全部下沉 references，本文件只做路由与红线。
+
 ## 平台适用（执行前先读）
-- 本技能当前**仅在 macOS（Darwin）实测可用**，命令、路径、代理端口与系统原生能力均按 Mac。
-- 动手前先判平台：`uname -s` 返回 `Darwin` 才走本技能流程；**Windows/Linux 未适配，遇到就停下告知用户“需先做该平台适配”，不要用想当然的等价命令硬跑**。
-- 以后补齐 Windows 后也必须保留“先判平台 → 按平台分流”的结构：mac/Windows 的命令与路径分开写、各自标注是否已验证。
+- 当前**仅 macOS（Darwin）实测可用**。动手前 `uname -s` 返回 `Darwin` 才继续；**Windows/Linux 未适配，遇到就停下告知"需先做平台适配"，不要用想当然的等价命令硬跑**。
+- 将来补齐 Windows 后仍保留"先判平台 → 按平台分流"结构，命令与路径分开写、分别标注验证状态。
 
-## 架构总览
+## 何时用 / 反触发
+- **用**：操作 Mac 桌面（开/切/点 App、关机重启、查温度健康、风扇）；Chrome/Electron 内部网页内容；窗口移动/分屏/双屏布局；VPN 开关、代理设置、网络不通；找文件、磁盘空间；维护 `~/Doubao/skills` 这套 git submodule 仓库群（子模块增删升级、指针漂移、多仓批量、gita 总览）。
+- **反触发**：纯网页取数已有专用抓取技能、纯文本任务无需本技能；别用 cu plane 做单步轻量操作（大炮打蚊子）。
 
-四层分层控制，按需选用。详细说明见 [README.md](README.md)。
+## 四层架构（按这个选层）
 
-| 层级 | 工具 | 适用 |
+| 层 | 工具 | 适用 |
 |------|------|------|
-| 第一层：统一桌面控制 | cu plane / axcli / AppleScript | 原生 App GUI 操作（默认入口） |
-| 第二层：Chrome 内核控制 | bu / Playwright / Puppeteer / CDP / MCP | Chrome 网页、VS Code、Electron App 内部内容 |
-| 第三层：窗口管理 | Spectacle / AppleScript | 窗口移动/resize/双屏布局 |
-| 第四层：专项功能 | 脚本+文档 | 电源管理、健康检查、VPN控制、文件搜索 |
+| 一 统一桌面控制 | cu plane / axcli / AppleScript | 原生 App GUI 操作（默认入口） |
+| 二 Chrome 内核控制 | bu / Playwright / Puppeteer / CDP | Chrome 网页、VS Code、Electron 内部内容 |
+| 三 窗口管理 | Spectacle / AppleScript | 窗口移动/resize/双屏布局 |
+| 四 专项功能 | 脚本+文档 | 电源、健康、VPN代理、文件搜索、Git 规范 |
 
-## 使用场景决策树
+**核心原则**：能简单就不复杂；能元素级就不坐标级；cu plane 是重武器，单步操作用 axcli/AppleScript。
 
-每次操作前按顺序判断：
+## 按需加载索引（要做 X → 读这篇）
 
-```
-需要操作 Mac 桌面
-│
-├─ 找文件/搜索内容/磁盘空间分析？ → file-search.md
-├─ Chrome/Electron App 内部内容？ → 第二层 [chrome-app-control.md]
-├─ 窗口级操作（移动/resize/布局）？ → 第三层 [window-management.md]
-├─ 单步操作且已知坐标/选择器？ → axcli 轻量操作 [cu-plane-guide.md §轻量操作]
-├─ 系统弹窗单步点击/后台发命令？ → AppleScript [cu-plane-guide.md §AppleScript]
-└─ 多步完整任务需观察-行动循环？ → cu plane 重武器 [cu-plane-guide.md]
-```
+| 你要做 | 读 |
+|------|------|
+| 多步桌面 GUI 任务、cu plane/axcli/AppleScript 怎么选 | [references/cu-plane-guide.md](references/cu-plane-guide.md) |
+| Chrome/Electron 内部：bu、Playwright CLI、选型 | [references/chrome-control-overview.md](references/chrome-control-overview.md) |
+| CDP 直连、Puppeteer 复用日常 Chrome 登录态、VS Code/Electron | [references/chrome-cdp-puppeteer.md](references/chrome-cdp-puppeteer.md) |
+| Chrome 调试、连接失败恢复、Gemini 按钮 | [references/chrome-control-ops.md](references/chrome-control-ops.md) |
+| 窗口移动/分屏/双屏布局、坐标 | [references/window-management.md](references/window-management.md) |
+| 找文件/内容/磁盘空间 | [references/file-search.md](references/file-search.md) |
+| 电源管理（关机/重启/睡眠） | [references/power-management.md](references/power-management.md) |
+| 硬件健康、温度、风扇 | [references/health-check.md](references/health-check.md) |
+| VPN/代理：环境检测、终端代理设置、是否走代理判断 | [references/vpn-control.md](references/vpn-control.md) |
+| 代理客户端菜单栏控制、系统 VPN、网络故障排查 | [references/proxy-client-control.md](references/proxy-client-control.md) |
+| 密码/token/密钥加密存取 | [references/secret-encryption.md](references/secret-encryption.md) |
+| git submodule 规范（克隆、增删升级、指针漂移、新机器） | [references/git-submodule-workflow.md](references/git-submodule-workflow.md) |
+| gita 多仓一屏总览与批量遥控 | [references/gita-multi-repo.md](references/gita-multi-repo.md) |
 
-**核心原则**：能简单就不复杂；能元素级就不坐标级；cu plane 是重武器，单步操作不要用大炮打蚊子。
+## 硬红线（当场可见，不靠跳转）
 
-### 专项文档路由（非桌面操作）
+- **权限**：axcli / cu plane 需要「辅助功能」和「屏幕录制」权限。
+- **坐标先实测**：显示器分辨率/排列因机而异，涉及坐标前先 `system_profiler SPDisplaysDataType`，勿照抄他机坐标；Dock 底部自动隐藏预留 ~90px。
+- **代理端口不写死**：ClashX 多 7890、ClashVerge 多 7897；先按 vpn-control.md 探测并 `export PROXY_PORT=...`，命令统一 `127.0.0.1:${PROXY_PORT:-7890}`。
+- **凭证唯一权威源**：密码/token/密钥一律用全局命令 `secrets` 加密存取、`audit-secrets.sh` 巡检，明文不进 git/日志；主密码只从 `ENC_PASS` 或交互输入，**不硬编码、不猜测，用户没给就问**（详见 secret-encryption.md）。
+- **Git 先子后父**：改技能仓库群 = 子仓一次提交 + 父仓一次指针提交，先子后父。
+- **路径可移植**：示例一律 `~`/`$HOME`/`os.homedir()`，不写死 `/Users/<用户名>`。
+- **接管别关窗**：操作用户已开的 Chrome 收尾用 `disconnect()`/`detach`，不要 `close()`/`kill`。
 
-| 需求 | 直接读 |
-|------|--------|
-| Git submodule / 技能仓库群维护（克隆、子模块增删升级、指针漂移、新机器配置、批量多仓、gita 一屏总览） | [git-submodule-workflow.md](references/git-submodule-workflow.md) |
-| 密码 / token / API key 等凭证加密存储与取用（sudo 密码、GitHub PAT、webhook、平台密钥） | [secret-encryption.md](references/secret-encryption.md)，工具 `scripts/secrets.sh` |
-| Chrome「Gemini in Chrome」按钮启用 / 修复 | [chrome-app-control.md §七](references/chrome-app-control.md)（按其中飞书文档处理，不重复造脚本） |
-
-## 系统环境
-
-- **显示器/坐标**：分辨率、屏幕数量与排列因机而异，涉及坐标布局前先用 `system_profiler SPDisplaysDataType` 实测，勿照抄他机坐标（窗口坐标详见 window-management.md）
-- **Dock**：底部自动隐藏，预留 ~90px
-- **代理客户端/端口**：因机而异、不写死（一台 ClashX/7890、另一台 ClashVerge/7897）；先按 [vpn-control.md](references/vpn-control.md) 的「端口约定」探测并 `export PROXY_PORT=...`，命令统一写 `127.0.0.1:${PROXY_PORT:-7890}`
-- **Node.js**：用 `command -v node` / `node -v` 动态定位（nvm/brew 的安装位置与版本因机而异，不写死具体版本路径）
-- **axcli**：`~/.cargo/bin/axcli`
-- **技能目录**：`~/Doubao/skills/mac-system-toolkit`
-
-## 快速参考
-
-### 常用脚本
+## 常用命令速记
 
 ```bash
 SKILL_DIR="$HOME/Doubao/skills/mac-system-toolkit"
+bash "$SKILL_DIR/scripts/health_check.sh"                 # 综合健康检查
+bash "$SKILL_DIR/scripts/power.sh shutdown 30"            # 关机/重启（30s 可取消，restart 同理）
+bash "$SKILL_DIR/scripts/setup-git-submodule-global.sh"   # 新机器 git submodule 全局默认项（幂等）
+bash "$SKILL_DIR/scripts/audit-secrets.sh" ~/Doubao       # 多仓明文密钥巡检
+secrets get <name>                                        # 全局取凭证（详见 secret-encryption.md）
 
-# 综合健康检查
-bash "$SKILL_DIR/scripts/health_check.sh"
+# 代理
+export https_proxy=http://127.0.0.1:${PROXY_PORT:-7890} http_proxy=http://127.0.0.1:${PROXY_PORT:-7890}
 
-# 仅温度检测
-bash "$SKILL_DIR/scripts/check_temp.sh"
-
-# 关机（30秒延迟可取消）
-bash "$SKILL_DIR/scripts/power.sh shutdown 30"
-
-# 重启（30秒延迟可取消）
-bash "$SKILL_DIR/scripts/power.sh restart 30"
-
-# 新机器一键配置 git submodule 全局默认项（幂等，详见 git-submodule-workflow.md）
-bash "$SKILL_DIR/scripts/setup-git-submodule-global.sh"
-
-# 多仓明文密钥巡检（起始目录任意、不写死；-w 加扫工作区，-p '词' 追加可疑串，详见 secret-encryption.md）
-bash "$SKILL_DIR/scripts/audit-secrets.sh" ~/Doubao
-
-# 凭证加密/解密：全局唯一命令 secrets（新机器先执行一次 bash "$SKILL_DIR/scripts/secrets.sh" install；详见 secret-encryption.md）
-secrets get <name>              # 取全局凭证 ~/.doubao/secrets/<name>.enc
-secrets decrypt .secrets/x.enc  # 解项目内密文；secrets json x.enc <字段> 解 JSON 密文取字段
+# 文件
+mdfind -name "文件名"; fd "文件名" /path; rg "文本" /path; ncdu /path
 ```
 
-### 常用命令
-
-```bash
-# 激活 App
-osascript -e 'tell application "AppName" to activate'
-
-# iTerm2 后台发命令（不抢焦点）
-osascript -e 'tell application "iTerm2" to tell current session of current window to write text "CMD"'
-
-# axcli 点击菜单栏图标（已知坐标）
-~/.cargo/bin/axcli mouse click <x> <y>
-
-# axcli 可靠点击策略
-~/.cargo/bin/axcli --app "AppName" click 'AXButton >> nth=0' --strategy cg --activate --no-visual-cursor
-
-# 前台 App
-osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true'
-
-# 终端代理（下载时）
-export PROXY_PORT=7897   # 先按 vpn-control.md 探测到本机端口（示例为 ClashVerge；ClashX 多为 7890）
-export https_proxy=http://127.0.0.1:$PROXY_PORT http_proxy=http://127.0.0.1:$PROXY_PORT all_proxy=socks5://127.0.0.1:$PROXY_PORT
-
-# 文件搜索（系统级，即时）
-mdfind -name "文件名"
-# 文件搜索（已知目录）
-fd "文件名" /path/to/dir
-# 内容搜索
-rg "搜索文本" /path/to/dir
-# 磁盘空间分析
-ncdu /path/to/dir
-```
-
-### 各 App 特殊点
-
-| App | 特殊点 | 默认工具 |
-|-----|--------|---------|
-| Chrome | 网页内容 AX 不可见 | bu / Playwright / CDP |
-| VS Code | Electron，内部 DOM 需 CDP | CDP 直连 |
-| iTerm2 | 后台发命令不需激活 | AppleScript write text |
-| Doubao | Electron 聊天区 AX 不可见，需截图 | cu plane（多步任务） |
-| 代理客户端（ClashX/ClashVerge） | 菜单栏-only，图标位置动态变化 | axcli（单步点击，坐标先发现） |
-| 其他原生 App | 无特殊点 | cu plane（默认） |
-
-## 错误恢复速查
-
-| 错误 | 原因 | 处理 |
-|------|------|------|
-| `user is operating` | 用户正在操作目标 App | 等 2-3s 重试 |
-| `CU_AX_ELEMENT_INVALID` | 元素索引过期 | 重新 get_app_state 取新索引 |
-| `CU_AX_APP_NOT_SURFACE` | 菜单栏-only App，cu 看不到 | fallback 到 axcli |
-| CDP connection refused | VS Code 未带调试端口启动 | Cmd+Q 后用 `--remote-debugging-port=9222` 重启 |
-| brew 卡住 | 残留 brew 锁 | `pkill -9 -f brew; rm -f ~/Library/Caches/Homebrew/downloads/*.incomplete` |
-| 终端 DNS 超时 | shell 未设代理 | 先 `export PROXY_PORT=<本机端口>`，再 `export https_proxy=http://127.0.0.1:$PROXY_PORT`（端口以实测为准） |
-| axcli 默认策略冻结 | `--strategy cg-pid` 有问题 | 用 `--strategy cg --activate --no-visual-cursor` |
-| 坐标点击多屏偏移 | 硬编码坐标/坐标系混用 | 改用元素级操作，或动态读元素 position 算中心 |
-
-## 注意事项
-
-- **cu plane 完整规范**：见系统内置 `computer-use-automation-mac` 技能，本技能的 cu-plane-guide 是要点提炼
-- **权限**：axcli/cu plane 需要「辅助功能」和「屏幕录制」权限
-- **项目特定流程**：高顿课程项目的做题/下载/视频流程在项目文档中，本技能只放通用方法
-- **Git 子模块规范**：维护 `~/Doubao/skills` 技能仓库群（submodule 增删/升级、指针漂移、新机器克隆）先读 [git-submodule-workflow.md](references/git-submodule-workflow.md)；改动遵循"先子后父"两次提交
-- **Chrome Gemini 按钮**：启用/修复直接按 [chrome-app-control.md §七](references/chrome-app-control.md) 指向的飞书文档操作，不重复建 Skill/脚本
-- **凭证加密（唯一权威源 [secret-encryption.md](references/secret-encryption.md)）**：密码 / token / API key / secret 一律加密落盘、明文不进 git，用全局命令 `secrets`（源 `scripts/secrets.sh`）加解密、`audit-secrets.sh` 巡检；主密码只从 `ENC_PASS` 或交互输入获得，**不硬编码、不猜测，用户没给就问**
+## 与其他技能边界
+- cu plane 完整规范在系统内置 `computer-use-automation-mac`；本技能 cu-plane-guide 只是要点提炼。
+- 凭证规则/泄漏应急按 security-baseline；双机台账按 dual-machine-manager；本技能只提供动作（`secrets`、`audit-secrets.sh`、代理开关）。
+- 项目特定流程（做题/下载/视频等）归项目文档，本技能只放通用方法。

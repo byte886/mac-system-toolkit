@@ -220,3 +220,31 @@ osascript -e 'tell application "AppName" to activate'
 - 用 AX 树证明 UI 状态，用文件系统证明持久化
 - 确认预期值/选择/窗口/控件存在，且无错误/阻塞弹窗
 - 系统弹窗点击后，以业务状态为准（不只是弹窗消失）
+
+---
+
+## 六、各 App 特殊点与跨层错误速查
+
+### 各 App 默认工具
+
+| App | 特殊点 | 默认工具 |
+|-----|--------|---------|
+| Chrome | 网页内容 AX 不可见 | bu / Playwright / CDP |
+| VS Code | Electron，内部 DOM 需 CDP | CDP 直连 |
+| iTerm2 | 后台发命令不需激活 | AppleScript write text |
+| Doubao | Electron 聊天区 AX 不可见，需截图 | cu plane（多步任务） |
+| 代理客户端（ClashX/ClashVerge） | 菜单栏-only，图标位置动态变化 | axcli（单步点击，坐标先发现） |
+| 其他原生 App | 无特殊点 | cu plane（默认） |
+
+### 跨层错误速查
+
+| 错误 | 原因 | 处理 |
+|------|------|------|
+| `user is operating` | 用户正在操作目标 App | 等 2-3s 重试 |
+| `CU_AX_ELEMENT_INVALID` | 元素索引过期 | 重新 get_app_state 取新索引（见 §二） |
+| `CU_AX_APP_NOT_SURFACE` | 菜单栏-only App，cu 看不到 | fallback 到 axcli |
+| CDP connection refused | VS Code 未带调试端口启动 | Cmd+Q 后用 `--remote-debugging-port=9222` 重启（见 chrome-cdp-puppeteer.md） |
+| brew 卡住 | 残留 brew 锁 | `pkill -9 -f brew; rm -f ~/Library/Caches/Homebrew/downloads/*.incomplete` |
+| 终端 DNS 超时 | shell 未设代理 | 先 `export PROXY_PORT=<本机端口>`，再设 https_proxy（见 proxy-client-control.md） |
+| axcli 默认策略冻结 | `--strategy cg-pid` 有问题 | 用 `--strategy cg --activate --no-visual-cursor`（见 §三） |
+| 坐标点击多屏偏移 | 硬编码坐标/坐标系混用 | 改用元素级操作，或动态读元素 position 算中心 |
