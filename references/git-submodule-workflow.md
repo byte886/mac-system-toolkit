@@ -262,7 +262,7 @@ git subtree push --prefix=dir <url> main
 
 ### 8.1 它解决原生 git 的什么短板
 
-`git submodule status` 只回答"指针对没对齐"，**不显示每个仓当前分支、有没有未提交改动、相对远程 ahead/behind**；想巡检 11 个仓只能逐个 `cd` 进去看。gita（[nosarthur/gita](https://github.com/nosarthur/gita)）就是补上这块的"仪表盘 + 批量遥控器"：一屏列出所有仓库，并对它们批量执行 git 命令。它**不替代 submodule**，而是建在其上的便捷外壳。
+`git submodule status` 只回答"指针对没对齐"，**不显示每个仓当前分支、有没有未提交改动、相对远程 ahead/behind**；想一次巡检十几个仓只能逐个 `cd` 进去看。gita（[nosarthur/gita](https://github.com/nosarthur/gita)）就是补上这块的"仪表盘 + 批量遥控器"：一屏列出所有仓库，并对它们批量执行 git 命令。它**不替代 submodule**，而是建在其上的便捷外壳。
 
 ### 8.2 安装
 
@@ -295,7 +295,7 @@ gita add -r ~/Doubao        # 递归登记：根仓 + skills 全部子模块 + �
 gita ls                     # 列出已登记仓库名
 ```
 
-- 递归 `-r` 幂等：已登记的不重复，新增 git 仓下次再跑会补上；它会把 `chats/` 下业务仓也纳入（如 gaodun 只在 .9 上，故 .9 纳管 14 个、本机 13 个，属正常差异）。
+- 递归 `-r` 幂等：已登记的不重复，新增 git 仓下次再跑会补上；它会把 `chats/` 下业务仓也纳入（如 gaodun 仅 .9 有）。纳管数随各机业务仓而变，以 `gita ls` 现场实测为准，两机数量不同属正常差异。
 - 想精确控制就逐个显式 `gita add <repo路径>`（只登记真实存在的 git 仓，不存在的路径会报错、跳过即可）。
 
 > 新机器跑 `scripts/setup-git-submodule-global.sh` 时，若检测到已装 gita 会自动执行递归登记。
