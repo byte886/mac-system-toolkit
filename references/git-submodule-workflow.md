@@ -302,25 +302,46 @@ gita ls                     # 列出已登记仓库名
 
 > 新机器跑 `scripts/setup-git-submodule-global.sh` 时，若检测到已装 gita 会自动执行递归登记。
 
-### 8.4 日常命令
+### 8.4 日常命令（按用途分组；均可从任意目录发起，不用逐个 cd）
+
+**总览 / 登记**
 
 | 命令 | 作用 |
 |------|------|
-| `gita ll` | **总览**：每仓一行——名称 / 分支 / 状态符 / 最近提交 |
-| `gita ls` | 只列已登记仓库名 |
-| `gita st` | 对所有仓批量 `git status` |
-| `gita fetch` / `gita pull` / `gita push` | 对所有仓批量执行；后接仓库名可只针对部分：`gita pull okf-wiki` |
-| `gita br` | 批量查看各仓分支 |
-| `gita log` / `gita last` | 批量查看提交 |
-| `gita shell` | 进入对所有仓执行任意 git 命令的交互 |
-| `gita rm <name>` | 取消登记（只移除 gita 记录，不删磁盘文件） |
+| `gita ll` | **一屏总览**：名称 / 分支 / 状态符 / 最近提交 |
+| `gita ls` | 只列已登记仓库名；`gita ls <name>` 可看某仓绝对路径 |
+| `gita rm <name>` | 取消登记（只移除 gita 记录，**不删磁盘文件**） |
+| `gita rename <旧名> <新名>` | 改登记名 |
+| `gita freeze` | 导出全部仓的 CSV（remote/name/path…），用于备份或换机对照（见 §8.8） |
+
+**批量 git（核心）**
+
+| 命令 | 作用 |
+|------|------|
+| `gita fetch` / `pull` / `push` [仓名…] | 不给仓名=全部；给一个或多个仓名/组名=只针对它们，如 `gita pull okf-wiki` |
+| `gita st` / `br` / `last` / `lo` | 批量 `status` / 本地分支 / HEAD 提交 / 最近 7 条一行 log |
+| `gita super [仓名…] <git 命令>` | **代发任意 git 命令或 git 别名**，如 `gita super mac-system-toolkit log --oneline -3`、`gita super captcha-reader face-detect checkout main` |
+| `gita shell [仓名…] <shell 命令>` | 代发任意 **shell** 命令（与 super 区分：super 跑 git，shell 跑非 git 的 shell 命令；都不是"进入交互"） |
+
+**圈定操作范围（仓多时用，避免误操作到无关仓）**
+
+```bash
+gita group add -n skills captcha-reader face-detect mac-system-toolkit ...  # 建组并纳仓
+gita group ll            # 看有哪些组；group rmrepo / group rm 移除
+gita context auto        # 按当前所在目录，自动把批量操作限定到对应组
+gita context skills      # 手动选定某个组；gita context none 取消限定
+```
+设了 context 后，上面所有批量命令只作用于该组。
+
+> ⚠️ `gita clean` 会批量删除未跟踪文件（等价 `git clean`，不可恢复）；用前先 `gita st` 看清，不要对全仓直接跑。
 
 ### 8.5 `gita ll` 状态符含义
 
 | 符号 | 含义 |
 |---|---|
 | `[]` | 工作区干净、与远程同步 |
-| `*` | 有未提交修改 |
+| `∅` | 本地没有远程跟踪分支（`submodule update` 后的 detached HEAD 子模块最常见，**不是报错**） |
+| `*` / `+` | 有未提交修改 / 有已暂存(staged)改动 |
 | `?` | 有未跟踪文件 |
 | `>` / `<` / `=` | 领先远程 / 落后远程 / 已分叉 |
 | `$` | 有 stash |
@@ -332,7 +353,19 @@ gita ls                     # 列出已登记仓库名
 ### 8.7 与原生 submodule 命令的分工
 
 - **克隆、增删子模块、指针升级、改名/删除、故障排查** → 用本文件 §2–§5 的**原生 `git submodule`**（这些 gita 不管）；
-- **一屏总览状态、批量 fetch/pull、跨仓巡检** → 用 **gita**。
+- **一屏总览状态、跨目录批量 fetch/pull/super、按组巡检** → 用 **gita**；
+- 两条批量通道的边界：`gita super` 按**登记名/组**选仓、依赖 gita 已登记；`git submodule foreach --recursive` 严格按 **submodule 层级**递归（含 wx-cli 二级嵌套）、不依赖 gita，适合结构性操作或新机尚未装 gita 时。
+
+### 8.8 换机 / 双机对齐纳管清单
+
+纳管清单是机器相关文件 `~/.config/gita/repos.csv`（含绝对路径，**不入库**）。双机家目录名不同（wenjiechen↔chenwenjie），不要直接拷贝覆盖：
+
+```bash
+gita freeze                 # 源机导出 remote/name/path 的 CSV，用于对照
+# 新机优先递归重登（幂等，自动用本机绝对路径）：
+gita add -r ~/Doubao
+# 只在某台机存在的业务仓（如 gaodun 仅 .9 有），另一台自然不会被登记，属正常差异
+```
 
 ---
 
@@ -342,4 +375,4 @@ gita ls                     # 列出已登记仓库名
 - gitsubmodules 概念文档：<https://git-scm.com/docs/gitsubmodules>
 - GitHub Training《Submodule vs Subtree Cheat Sheet》：<https://training.github.com/downloads/submodule-vs-subtree-cheat-sheet/>
 - gita（可选多仓工具）：<https://github.com/nosarthur/gita>
-- 整理日期：2026-09-14；以本机 git 2.55 实测为准。
+- 初版整理 2026-09-14；安装与用法以 2026-09-15 双机（Intel、gita 0.16.8.2、Homebrew 7.0.1）实测为准。
