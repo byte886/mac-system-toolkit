@@ -1,0 +1,16 @@
+{
+  "name": "chrome-cdp-connect-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "mac-system-toolkit 技能配套：连接用户日常 Chrome（通道B）的授权 sheet 自动 AXPress、连接封装、标签页清理。node_modules 不入库，在本目录执行 npm install 补足。",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "connect:check": "node connect_browser.js",
+    "tabs:clean": "node tab_hygiene.js act=Display/image"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.9.0"
+  }
+}

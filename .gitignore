@@ -3,6 +3,10 @@
 __pycache__/
 *.pyc
 
+# Node（脚本配套依赖，按各目录 package.json 现装）
+node_modules/
+npm-debug.log*
+
 # --- 凭证：明文绝不入库，仅 .secrets 下 .enc 加密件放行（约定见 references/secret-encryption.md）---
 .secrets/*.json
 .secrets/*.txt

@@ -58,7 +58,12 @@ const browserWSEndpoint = `ws://127.0.0.1:${port}${wsPath}`;
 要点：
 - 连**已开的日常 Chrome 用 `puppeteer.connect` + `browserWSEndpoint`**，不要 launch 新浏览器；收尾用 `disconnect()`（保留用户窗口），不要 `close()`。
 - 通道 A（有 HTTP 端点）也可用 `puppeteer.connect({ browserURL: 'http://127.0.0.1:9222' })`。
-- **完整可运行的工程范例（授权弹窗代点、target 选择、健壮重连）不在本技能复制**，见对应业务仓的 `scripts/cdp/connect_browser.js` 与决策记录 ADR；本技能只沉淀通用方法（DRY）。
+- **完整可运行工程已随技能提供**：技能目录 `scripts/chrome-cdp/`（首次在该目录执行 `npm install`）：
+  - `connect_browser.js`：连接封装（端点现读、授权代点、偶发 403 退避重试、必要时拉起 Chrome）
+  - `press_allow.applescript` + `press_allow_locked.sh`：授权 sheet AXPress 与跨进程互斥锁
+  - `cdp_consent_guard.sh`：整个自动化周期的残留/晚到授权兜底守护
+  - `tab_hygiene.js`：关闭本流程产生的标签（见本节末「标签页卫生」）
+- 业务项目应**直接复制该目录使用**，不要再回某个业务仓翻找。
 
 ---
 
@@ -113,20 +118,57 @@ const { chromium } = require('playwright');
 
 ---
 
-## 五、Chrome 远程调试授权弹窗
+## 五、Chrome 远程调试授权弹窗（含完整 SOP）
 
-连接 Chrome CDP（尤其通道 B，**每次连接都会弹一次**，官方刻意设计、无法永久关闭）时，用 AppleScript AXPress 自动点掉：
+连接 Chrome CDP（尤其通道 B，**每次连接都会弹一次**，官方刻意设计、无法永久关闭）。
+成熟脚本已随技能提供于 `scripts/chrome-cdp/`，按以下事实使用：
+
+1. **弹窗是挂在 window 上的模态 sheet**：入口只取 `sheets of windows`；按钮直接挂 sheet 上，
+   兜底也只在 sheet 内部有限深度递归，**绝不进入 AXWebArea**（上万节点、9s+ 超时）。
+2. **按钮可见文字在 AXDescription**（依次「在'设置'中关闭 / 取消 / 允许」），AXTitle 为空；
+   按 description 含「允许」定位。
+3. **必须对按钮 `perform action "AXPress"`**：合成坐标点击只会关窗、不会真正授权
+   （且极易误点取消）；元素级动作与屏幕坐标/多显示器无关。
+4. **高频 + 串行**：握手期起 800ms 循环代点；同一时刻全机最多一个代点 osascript
+   （`press_allow_locked.sh` 用 mkdir 原子锁），并发会在 System Events 拥塞死等。
+5. **握手包裹重试**：connect 前后存在偶发竞态（WS 挂起或先回 403），退避重试 1–2 次即稳定。
+6. **长周期兜底**：整个自动化/下载期间另跑 `cdp_consent_guard.sh`，处理晚到/残留 sheet。
+7. 代点会在点中瞬间把前台焦点还给连接前的 App（由参数传入）。
+
+前置：运行宿主需在「系统设置 → 隐私与安全性 → 辅助功能」授权。
 
 ```bash
-osascript /path/to/scripts/cdp/press_allow.applescript
+cd scripts/chrome-cdp && npm install
+# 单次代点（无弹窗时安静返回 pressed=false）
+bash press_allow_locked.sh
+# 整个运行周期的兜底守护
+bash cdp_consent_guard.sh
 ```
-
-经验：只遍历**授权 sheet 本身**去点"允许"，**不要遍历网页 AXWebArea**（会上万节点导致超时）；多次连接必须**串行**点按，避免 System Events 拥塞。详见 [cu-plane-guide.md](cu-plane-guide.md) 的 AppleScript 部分。
 
 ---
 
-## 六、CDP / Puppeteer 专属注意事项
+## 六、标签页卫生（用完即关）
+
+自动化打开的工作标签应及时关闭，避免标签越积越多、下轮误用旧页：
+
+- **开新页前**：按工作页 URL 特征关闭上轮残留标签；
+- **收工时**：关闭本轮打开的标签；
+- 只关 URL 命中模式的标签，用户原有标签一律不动；断开连接（disconnect）与关闭自己开的标签不冲突。
+
+```bash
+# CLI：关闭 URL 含 "act=Display/image" 的标签
+node scripts/chrome-cdp/tab_hygiene.js "act=Display/image"
+```
+
+```javascript
+const { closeTabsByUrl } = require('./scripts/chrome-cdp/tab_hygiene');
+await closeTabsByUrl(browser, ['act=Display/image']);
+```
+
+---
+
+## 七、CDP / Puppeteer 专属注意事项
 
 - **端点现读**：`DevToolsActivePort` 里的 uuid 每次重启都变，禁止硬编码；通道 B 是 WebSocket-only，`/json` 返回 404 属正常，别误判成"没开调试"。
 - **双机路径解耦**：自动化脚本一律用 `os.homedir()` / `$HOME` 拼路径，不写死 `/Users/<用户名>`（两台机家目录名不同）。
-- **断开别关窗**：接管用户已开的 Chrome 时收尾用 `disconnect()`/`detach`，不要 `close()`/`kill`，避免关掉用户正在用的窗口。
+- **断开别关窗、但要关自己开的标签**：收尾用 `disconnect()`/`detach`，不要 `close()`/`kill` 用户的 Chrome 窗口；流程自身打开的工作标签按第六节关闭。
