@@ -58,7 +58,7 @@ compatibility: "仅 macOS(Darwin) 实测；执行前先 `uname -s` 判平台，�
 ## 常用命令速记
 
 ```bash
-SKILL_DIR="$HOME/Doubao/skills/mac-system-toolkit"
+SKILL_DIR="<本技能安装目录>"
 bash "$SKILL_DIR/scripts/health_check.sh"                 # 综合健康检查
 bash "$SKILL_DIR/scripts/power.sh shutdown 30"            # 关机/重启（30s 可取消，restart 同理）
 bash "$SKILL_DIR/scripts/setup-git-submodule-global.sh"   # 新机器 git submodule 全局默认项（幂等）

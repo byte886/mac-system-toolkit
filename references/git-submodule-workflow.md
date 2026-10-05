@@ -73,7 +73,7 @@ git submodule update --init --recursive
 直接跑本技能自带的幂等脚本（可重复执行）：
 
 ```bash
-bash "$HOME/Doubao/skills/mac-system-toolkit/scripts/setup-git-submodule-global.sh"
+bash "<本技能安装目录>/scripts/setup-git-submodule-global.sh"
 ```
 
 它设置的 4 条全局配置（来自官方 Cheat Sheet，含义见脚本注释）：

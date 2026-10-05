@@ -90,7 +90,7 @@ bash ~/Doubao/skills/mac-system-toolkit/scripts/power.sh restart 30
 ## 五、脚本用法
 
 ```bash
-POWER_SCRIPT="$HOME/Doubao/skills/mac-system-toolkit/scripts/power.sh"
+POWER_SCRIPT="<本技能安装目录>/scripts/power.sh"
 
 # 关机（默认30秒延迟）
 bash "$POWER_SCRIPT" shutdown
