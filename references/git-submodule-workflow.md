@@ -35,7 +35,7 @@
     ├── multiplatform-media-fetch ── byte886/multiplatform-media-fetch
     ├── okf-wiki                 ── byte886/okf-wiki
     ├── photo-organize           ── byte886/photo-organize
-    ├── web-research-toolkit     ── byte886/web-research-toolkit
+    ├── research-toolkit     ── byte886/research-toolkit
     ├── work-doc-extract         ── byte886/work-doc-extract
     └── wechat-control           ── byte886/wechat-control
         └── third-party/wx-cli   ── byte886/wx-cli   （二级嵌套 submodule）
